@@ -126,10 +126,9 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
         'def_diff': p1_data['defense'] - p2_data['defense'],
         'spd_diff': p1_data['speed'] - p2_data['speed'],
         'total_power_diff': p1_data['total_power'] - p2_data['total_power'],
-        'p1_type_advantage': p1_mult,
-        'p2_type_advantage': p2_mult,
-        'legendary_p1': int(p1_data['is_legendary']),
-        'legendary_p2': int(p2_data['is_legendary'])
+        'p1_real_advantage': p1_mult,
+        'p2_real_advantage': p2_mult
+    }])
     }])
     
     prediction = model.predict(input_data)[0]
