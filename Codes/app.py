@@ -9,7 +9,7 @@ import streamlit.components.v1 as components
 # 1. PAGE CONFIGURATION
 # ======================================================
 st.set_page_config(
-    page_title="AI Pokémon Battle Arena",
+    page_title="Enna Look uh",
     page_icon="⚔️",
     layout="wide"
 )
@@ -194,7 +194,7 @@ if st.session_state.celebrate:
 # ======================================================
 # 7. UI LAYOUT
 # ======================================================
-st.markdown("<h1>⚡ AI Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
+st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
 st.markdown("<p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p>", unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns([1, 0.2, 1])
