@@ -2,26 +2,12 @@ import streamlit as st
 import pandas as pd
 import joblib
 import os
-from streamlit_lottie import st_lottie
 import requests
-import random # 🔥 NEW IMPORT for random choice
+import random
+import streamlit.components.v1 as components # 🔥 Required for HTML hack
 
 # 1. SETUP & LOADING
 st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", layout="wide")
-
-# Lottie Loader (For Fireworks)
-@st.cache_data
-def load_lottieurl(url: str):
-    try:
-        r = requests.get(url)
-        if r.status_code != 200:
-            return None
-        return r.json()
-    except:
-        return None
-
-# Load Fireworks Animation
-lottie_fireworks = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json")
 
 @st.cache_data
 def load_data():
@@ -45,6 +31,40 @@ def load_model():
 
 df = load_data()
 model = load_model()
+
+# ==========================================
+# 🔥 FULL SCREEN FIREWORKS FUNCTION
+# ==========================================
+def run_fullscreen_fireworks():
+    # This HTML/JS code loads the Lottie animation and forces it to cover the ENTIRE screen
+    fireworks_html = """
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <style>
+        .fireworks-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 99999; /* Super high z-index to be on top of everything */
+            pointer-events: none; /* Let users click through it */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: transparent;
+        }
+    </style>
+    <div class="fireworks-container">
+        <lottie-player 
+            src="https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json" 
+            background="transparent" 
+            speed="1" 
+            style="width: 100%; height: 100%;" 
+            autoplay>
+        </lottie-player>
+    </div>
+    """
+    components.html(fireworks_html, height=0, width=0) # Height 0 because it's fixed position
 
 # Type Chart Logic
 type_chart = {
@@ -114,7 +134,6 @@ with col3:
 st.divider()
 if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary"):
     
-    # Check for Mirror Match
     if p1_name == p2_name:
         st.error("⚠️ Machi, rendume onnu! Orey Pokemon thannoda sanda poda mudiyathu. Vera ethavathu select pannu!")
         st.stop()
@@ -123,7 +142,7 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
     p1_mult = get_dual_type_multiplier(p1_data['type1'], p2_data['type1'], p2_data['type2'])
     p2_mult = get_dual_type_multiplier(p2_data['type1'], p1_data['type1'], p1_data['type2'])
     
-    # Input Data for Model
+    # Input Data
     input_data = pd.DataFrame([{
         'hp_diff': p1_data['hp'] - p2_data['hp'],
         'atk_diff': p1_data['attack'] - p2_data['attack'],
@@ -148,13 +167,11 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
     elif p2_mult > 1.0 and prediction == 1:
         st.caption(f"💡 Analysis: {p2_name} has a Type Advantage ({p2_mult}x damage)!")
 
-    # 🔥 RANDOM CELEBRATION (Balloons OR Fireworks)
+    # 🔥 RANDOM CELEBRATION (Full Screen Fireworks OR Balloons)
     celebration = random.choice(["balloons", "fireworks"])
     
     if celebration == "balloons":
         st.balloons()
     else:
-        if lottie_fireworks:
-            st_lottie(lottie_fireworks, height=300, key=f"fireworks_{random.randint(0,1000)}")
-        else:
-            st.balloons() # Fallback if animation fails
+        # Calls the function to inject HTML/CSS for FULL SCREEN Fireworks
+        run_fullscreen_fireworks()
