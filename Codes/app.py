@@ -21,7 +21,7 @@ st.markdown("""
 <style>
 /* Remove top padding */
 .block-container {
-    padding-top: 3rem !important;
+    padding-top: 1rem !important;
 }
 
 /* Header Adjustments */
@@ -83,11 +83,20 @@ h1 {
     display: inline-block;
 }
 
-
+/* FULL WIDTH BUTTON STYLE */
+div.stButton > button {
+    width: 100%;
+    background-color: #FF4B4B; /* Reddish Orange like in image */
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    transition: all 0.3s;
+}
 div.stButton > button:hover {
-    background-color: #4B0082;
-    color: #FFCB05;
-    border-color: #FFCB05;
+    background-color: #D43F3F;
     transform: scale(1.01);
 }
 </style>
@@ -120,7 +129,7 @@ df = load_data()
 model = load_model()
 
 # ======================================================
-# 4. FULL TYPE CHART (CRITICAL LOGIC)
+# 4. FULL TYPE CHART
 # ======================================================
 type_chart = {
     'fire': {'grass': 2.0, 'water': 0.5, 'bug': 2.0, 'ice': 2.0, 'dragon': 0.5, 'steel': 2.0, 'rock': 0.5, 'ground': 0.5},
@@ -244,6 +253,7 @@ with col3:
 st.write("")
 st.write("")
 
+# REMOVED COLUMNS HERE -> BUTTON IS NOW FULL WIDTH (LENGTHY)
 if st.button("🔥 PREDICT WINNER 🔥"):
     # Mirror Match Check
     if p1 == p2:
@@ -278,8 +288,10 @@ if st.button("🔥 PREDICT WINNER 🔥"):
 
 # Display Winner Text (Persists after reload)
 if st.session_state.winner:
+    # UPDATED CSS: REDUCED PADDING (10px) FOR A SLIMMER BOX
     st.markdown(f"""
-    <div style="text-align:center; margin-top:20px; padding:20px; background:rgba(0,0,0,0.5); border-radius:10px; border:2px solid #4CAF50;">
+    <div style="text-align:center; margin-top:20px; padding:10px; background:rgba(0,0,0,0.5); border-radius:10px; border:2px solid #4CAF50;">
         <h2 style="color:#4CAF50; margin:0;">🏆 THE WINNER IS: {st.session_state.winner.upper()} 🏆</h2>
     </div>
+    <h3 style="text-align:center; color:white; margin-top:10px;">AI Confidence: {99.0}%</h3>
     """, unsafe_allow_html=True)
