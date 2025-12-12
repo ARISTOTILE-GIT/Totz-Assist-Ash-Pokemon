@@ -21,7 +21,7 @@ st.markdown("""
 <style>
 /* Remove top padding */
 .block-container {
-    padding-top: 5rem !important;
+    padding-top: 3rem !important;
 }
 
 /* Header Adjustments */
