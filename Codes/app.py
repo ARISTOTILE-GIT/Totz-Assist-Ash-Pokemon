@@ -1,25 +1,30 @@
-import os
 import streamlit as st
 import pandas as pd
 import joblib
-import numpy as np
+import os
+from streamlit_lottie import st_lottie
+import requests
 
 # 1. SETUP & LOADING
 st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", layout="wide")
 
+# Lottie Loader (For Fireworks)
+def load_lottieurl(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# Load Fireworks Animation
+lottie_fireworks = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json")
+
 @st.cache_data
 def load_data():
-    # Fix: Get the folder where app.py is located
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Construct the full path to the CSV
     csv_path = os.path.join(current_dir, 'pokemon_data.csv')
-    
-    # Check if file exists (Safety Check)
     if not os.path.exists(csv_path):
-        st.error(f"Error: Could not find file at {csv_path}")
+        st.error(f"❌ Error: Could not find file at {csv_path}")
         return pd.DataFrame()
-        
     df = pd.read_csv(csv_path)
     df['type2'] = df['type2'].fillna('None')
     return df
@@ -27,19 +32,61 @@ def load_data():
 @st.cache_resource
 def load_model():
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    model_path = os.path.join(current_dir, 'pokemon_battle_model_ultra.pkl')
-    
+    # Make sure this matches your uploaded file name exactly!
+    model_path = os.path.join(current_dir, 'pokemon_battle_model_ultra.pkl') 
     if not os.path.exists(model_path):
-        st.error(f" Error: Could not find model at {model_path}")
+        st.error(f"❌ Error: Could not find model at {model_path}")
         return None
-        
     return joblib.load(model_path)
 
 df = load_data()
 model = load_model()
 
-# Type Chart Logic (Namma Training la use pannadhu)
+# ==========================================
+# 🔥 VICTORY EFFECTS LOGIC (GIFs + Fireworks)
+# ==========================================
+def show_victory_effect(pokemon_type):
+    # 1. Try to find a specific GIF for the type
+    gif_urls = {
+        'fire': "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2FiZGYzYjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/3o7bc1I33a4Y0P6i2Y/giphy.gif",
+        'water': "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/l2JehaI3YJgqj7a80/giphy.gif",
+        'electric': "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/26BRExf1mK2r5tCjC/giphy.gif",
+        'grass': "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/3o7bu90hyq7fO1YI5a/giphy.gif"
+    }
+    
+    gif_url = gif_urls.get(pokemon_type.lower())
+    
+    if gif_url:
+        # If we have a GIF (Fire/Water/etc), Show Overlay!
+        st.markdown(
+            f"""
+            <style>
+            .victory-overlay {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background-image: url('{gif_url}');
+                background-size: cover;
+                background-position: center;
+                z-index: 9999;
+                opacity: 0.6;
+                pointer-events: none;
+            }}
+            </style>
+            <div class="victory-overlay"></div>
+            """,
+            unsafe_allow_html=True
+        )
+    else:
+        # If no GIF (Psychic, Rock, etc.), Show FIREWORKS! 🎆
+        if lottie_fireworks:
+            st_lottie(lottie_fireworks, height=300, key="fireworks")
+        else:
+            st.balloons() # Final fallback
+
+# Type Chart Logic
 type_chart = {
     'fire': {'grass': 2.0, 'water': 0.5, 'bug': 2.0, 'ice': 2.0, 'dragon': 0.5, 'steel': 2.0, 'rock': 0.5, 'ground': 0.5},
     'water': {'fire': 2.0, 'ground': 2.0, 'rock': 2.0, 'grass': 0.5, 'dragon': 0.5},
@@ -76,19 +123,15 @@ col1, col2, col3 = st.columns([1, 0.2, 1])
 
 with col1:
     st.header("Player 1")
-    p1_name = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu default
+    p1_name = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu
     p1_data = df[df['name'] == p1_name].iloc[0]
     
-    # Image from PokeAPI github
     st.image(f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p1_data['id']}.png", width=200)
-    
-    # Display Stats
     st.info(f"**{p1_data['name'].upper()}**")
     st.write(f"Type: {p1_data['type1']} / {p1_data['type2']}")
     st.progress(int(p1_data['hp']/255*100), text=f"HP: {p1_data['hp']}")
     st.progress(int(p1_data['attack']/190*100), text=f"Attack: {p1_data['attack']}")
     st.progress(int(p1_data['defense']/230*100), text=f"Defense: {p1_data['defense']}")
-    st.progress(int(p1_data['speed']/200*100), text=f"Speed: {p1_data['speed']}")
     st.write(f"**Total Power:** {p1_data['total_power']}")
 
 with col2:
@@ -96,30 +139,31 @@ with col2:
 
 with col3:
     st.header("Player 2")
-    p2_name = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard default
+    p2_name = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard
     p2_data = df[df['name'] == p2_name].iloc[0]
     
     st.image(f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p2_data['id']}.png", width=200)
-    
     st.info(f"**{p2_data['name'].upper()}**")
     st.write(f"Type: {p2_data['type1']} / {p2_data['type2']}")
     st.progress(int(p2_data['hp']/255*100), text=f"HP: {p2_data['hp']}")
     st.progress(int(p2_data['attack']/190*100), text=f"Attack: {p2_data['attack']}")
     st.progress(int(p2_data['defense']/230*100), text=f"Defense: {p2_data['defense']}")
-    st.progress(int(p2_data['speed']/200*100), text=f"Speed: {p2_data['speed']}")
     st.write(f"**Total Power:** {p2_data['total_power']}")
 
 # 4. PREDICTION LOGIC
 st.divider()
 if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary"):
-
+    
+    # Check for Mirror Match
     if p1_name == p2_name:
         st.error("⚠️ Machi, rendume onnu! Orey Pokemon thannoda sanda poda mudiyathu. Vera ethavathu select pannu!")
         st.stop()
+    
     # Feature Calculation
     p1_mult = get_dual_type_multiplier(p1_data['type1'], p2_data['type1'], p2_data['type2'])
     p2_mult = get_dual_type_multiplier(p2_data['type1'], p1_data['type1'], p1_data['type2'])
     
+    # Input Data for Model
     input_data = pd.DataFrame([{
         'hp_diff': p1_data['hp'] - p2_data['hp'],
         'atk_diff': p1_data['attack'] - p2_data['attack'],
@@ -130,15 +174,19 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
         'p2_real_advantage': p2_mult
     }])
     
-    
     prediction = model.predict(input_data)[0]
     probs = model.predict_proba(input_data)[0]
     
-    winner = p1_name if prediction == 0 else p2_name
+    winner_name = p1_name if prediction == 0 else p2_name
     confidence = probs[0] if prediction == 0 else probs[1]
     
-    st.balloons()
-    st.success(f"🏆 THE WINNER IS: **{winner.upper()}**")
+    # Find Winner's Type for Effect
+    winner_type = p1_data['type1'] if prediction == 0 else p2_data['type1']
+    
+    # 🔥 TRIGGER EFFECTS (Gif OR Fireworks)
+    show_victory_effect(winner_type)
+    
+    st.success(f"🏆 THE WINNER IS: **{winner_name.upper()}**")
     st.metric(label="AI Confidence Level", value=f"{confidence*100:.1f}%")
     
     if p1_mult > 1.0 and prediction == 0:
