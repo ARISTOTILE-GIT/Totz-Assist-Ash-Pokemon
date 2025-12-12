@@ -224,7 +224,7 @@ with col1:
 # --- VS TEXT ---
 with col2:
     # 🔥 FIX: Increased padding-top to 220px to push it down further
-    st.markdown("<h1 style='text-align:center; margin-left:15px; padding-top:220px; font-size:50px; color:#FF5733;'>VS</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center; margin-left:25px; padding-top:220px; font-size:50px; color:#FF5733;'>VS</h1>", unsafe_allow_html=True)
 
 # --- PLAYER 2 UI ---
 with col3:
