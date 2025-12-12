@@ -4,18 +4,24 @@ import joblib
 import os
 from streamlit_lottie import st_lottie
 import requests
+import time # 🔥 NEW IMPORT for timer
 
 # 1. SETUP & LOADING
 st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", layout="wide")
 
-# Lottie Loader (For Fireworks)
+# Lottie Loader
+@st.cache_data
 def load_lottieurl(url: str):
     r = requests.get(url)
     if r.status_code != 200:
         return None
     return r.json()
 
-# Load Fireworks Animation
+# 🔥 LOAD NEW HIGH-QUALITY ANIMATIONS
+lottie_fire = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_ltdx2kbc.json")
+lottie_water = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_kivnmdat.json")
+lottie_electric = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_2ngsjoes.json")
+lottie_grass = load_lottieurl("https://assets3.lottiefiles.com/packages/lf20_4l7m0dgy.json")
 lottie_fireworks = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json")
 
 @st.cache_data
@@ -43,48 +49,30 @@ df = load_data()
 model = load_model()
 
 # ==========================================
-# 🔥 VICTORY EFFECTS LOGIC (GIFs + Fireworks)
+# 🔥 NEW VICTORY EFFECTS LOGIC (Temporary Animations)
 # ==========================================
-def show_victory_effect(pokemon_type):
-    # 1. Try to find a specific GIF for the type
-    gif_urls = {
-        'fire': "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2FiZGYzYjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/3o7bc1I33a4Y0P6i2Y/giphy.gif",
-        'water': "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/l2JehaI3YJgqj7a80/giphy.gif",
-        'electric': "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/26BRExf1mK2r5tCjC/giphy.gif",
-        'grass': "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YjY5YiZlcD12MV9pbnRlcm5hbF9naWZzX2dpZklkJmN0PWc/3o7bu90hyq7fO1YI5a/giphy.gif"
-    }
+def show_victory_effect_temp(pokemon_type):
+    # Create an empty container to hold the animation temporarily
+    animation_placeholder = st.empty()
     
-    gif_url = gif_urls.get(pokemon_type.lower())
+    # Select appropriate animation
+    atype = pokemon_type.lower()
+    chosen_lottie = None
     
-    if gif_url:
-        # If we have a GIF (Fire/Water/etc), Show Overlay!
-        st.markdown(
-            f"""
-            <style>
-            .victory-overlay {{
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background-image: url('{gif_url}');
-                background-size: cover;
-                background-position: center;
-                z-index: 9999;
-                opacity: 0.6;
-                pointer-events: none;
-            }}
-            </style>
-            <div class="victory-overlay"></div>
-            """,
-            unsafe_allow_html=True
-        )
-    else:
-        # If no GIF (Psychic, Rock, etc.), Show FIREWORKS! 🎆
-        if lottie_fireworks:
-            st_lottie(lottie_fireworks, height=300, key="fireworks")
-        else:
-            st.balloons() # Final fallback
+    if atype == 'fire': chosen_lottie = lottie_fire
+    elif atype == 'water': chosen_lottie = lottie_water
+    elif atype == 'electric': chosen_lottie = lottie_electric
+    elif atype == 'grass' or atype == 'bug': chosen_lottie = lottie_grass
+    else: chosen_lottie = lottie_fireworks # Fallback for others
+
+    # Show animation inside the placeholder
+    if chosen_lottie:
+        with animation_placeholder:
+            st_lottie(chosen_lottie, height=350, key=f"anim_{atype}_{time.time()}")
+        
+        # WAIT for 4 seconds, then CLEAR the animation
+        time.sleep(4)
+        animation_placeholder.empty() # This stops the loop by removing it!
 
 # Type Chart Logic
 type_chart = {
@@ -179,12 +167,7 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
     
     winner_name = p1_name if prediction == 0 else p2_name
     confidence = probs[0] if prediction == 0 else probs[1]
-    
-    # Find Winner's Type for Effect
     winner_type = p1_data['type1'] if prediction == 0 else p2_data['type1']
-    
-    # 🔥 TRIGGER EFFECTS (Gif OR Fireworks)
-    show_victory_effect(winner_type)
     
     st.success(f"🏆 THE WINNER IS: **{winner_name.upper()}**")
     st.metric(label="AI Confidence Level", value=f"{confidence*100:.1f}%")
@@ -193,3 +176,6 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
         st.caption(f"💡 Analysis: {p1_name} has a Type Advantage ({p1_mult}x damage)!")
     elif p2_mult > 1.0 and prediction == 1:
         st.caption(f"💡 Analysis: {p2_name} has a Type Advantage ({p2_mult}x damage)!")
+        
+    # 🔥 TRIGGER TEMPORARY EFFECT (Shows for 4 seconds then disappears)
+    show_victory_effect_temp(winner_type)
