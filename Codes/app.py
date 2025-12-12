@@ -83,10 +83,9 @@ h1 {
     display: inline-block;
 }
 
-/* FULL WIDTH BUTTON STYLE */
+/* FULL WIDTH BUTTON STYLE - RED COLOR */
 div.stButton > button {
-    width: 100%;
-    background-color: #FF4B4B; /* Reddish Orange like in image */
+    background-color: #FF4B4B; /* Reddish Orange */
     color: white;
     font-weight: bold;
     font-size: 20px;
@@ -94,6 +93,9 @@ div.stButton > button {
     border-radius: 8px;
     border: none;
     transition: all 0.3s;
+    /* Note: use_container_width=True in Python handles the width now, 
+       but we keep this just in case */
+    width: 100%; 
 }
 div.stButton > button:hover {
     background-color: #D43F3F;
@@ -253,8 +255,8 @@ with col3:
 st.write("")
 st.write("")
 
-# REMOVED COLUMNS HERE -> BUTTON IS NOW FULL WIDTH (LENGTHY)
-if st.button("🔥 PREDICT WINNER 🔥"):
+# 🔥 BUTTON FIX: use_container_width=True forces it to fill the screen width!
+if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True):
     # Mirror Match Check
     if p1 == p2:
         st.error("⚠️ Machi, rendume onnu! Vera ethavathu select pannu!")
@@ -288,10 +290,10 @@ if st.button("🔥 PREDICT WINNER 🔥"):
 
 # Display Winner Text (Persists after reload)
 if st.session_state.winner:
-    # UPDATED CSS: REDUCED PADDING (10px) FOR A SLIMMER BOX
+    # 🔥 BOX FIX: Reduced padding (10px) and margin for a slimmer look
     st.markdown(f"""
-    <div style="text-align:center; margin-top:20px; padding:10px; background:rgba(0,0,0,0.5); border-radius:10px; border:2px solid #4CAF50;">
-        <h2 style="color:#4CAF50; margin:0;">🏆 THE WINNER IS: {st.session_state.winner.upper()} 🏆</h2>
+    <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.5); border-radius:10px; border:2px solid #4CAF50;">
+        <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">🏆 THE WINNER IS: {st.session_state.winner.upper()} 🏆</h2>
     </div>
-    <h3 style="text-align:center; color:white; margin-top:10px;">AI Confidence: {99.0}%</h3>
+    <h3 style="text-align:center; color:white; margin-top:5px;">AI Confidence: {99.0}%</h3>
     """, unsafe_allow_html=True)
