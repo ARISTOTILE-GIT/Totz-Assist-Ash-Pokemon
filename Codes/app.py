@@ -4,24 +4,23 @@ import joblib
 import os
 from streamlit_lottie import st_lottie
 import requests
-import time # 🔥 NEW IMPORT for timer
+import random # 🔥 NEW IMPORT for random choice
 
 # 1. SETUP & LOADING
 st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", layout="wide")
 
-# Lottie Loader
+# Lottie Loader (For Fireworks)
 @st.cache_data
 def load_lottieurl(url: str):
-    r = requests.get(url)
-    if r.status_code != 200:
+    try:
+        r = requests.get(url)
+        if r.status_code != 200:
+            return None
+        return r.json()
+    except:
         return None
-    return r.json()
 
-# 🔥 LOAD NEW HIGH-QUALITY ANIMATIONS
-lottie_fire = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_ltdx2kbc.json")
-lottie_water = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_kivnmdat.json")
-lottie_electric = load_lottieurl("https://assets10.lottiefiles.com/packages/lf20_2ngsjoes.json")
-lottie_grass = load_lottieurl("https://assets3.lottiefiles.com/packages/lf20_4l7m0dgy.json")
+# Load Fireworks Animation
 lottie_fireworks = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json")
 
 @st.cache_data
@@ -38,7 +37,6 @@ def load_data():
 @st.cache_resource
 def load_model():
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    # Make sure this matches your uploaded file name exactly!
     model_path = os.path.join(current_dir, 'pokemon_battle_model_ultra.pkl') 
     if not os.path.exists(model_path):
         st.error(f"❌ Error: Could not find model at {model_path}")
@@ -47,32 +45,6 @@ def load_model():
 
 df = load_data()
 model = load_model()
-
-# ==========================================
-# 🔥 NEW VICTORY EFFECTS LOGIC (Temporary Animations)
-# ==========================================
-def show_victory_effect_temp(pokemon_type):
-    # Create an empty container to hold the animation temporarily
-    animation_placeholder = st.empty()
-    
-    # Select appropriate animation
-    atype = pokemon_type.lower()
-    chosen_lottie = None
-    
-    if atype == 'fire': chosen_lottie = lottie_fire
-    elif atype == 'water': chosen_lottie = lottie_water
-    elif atype == 'electric': chosen_lottie = lottie_electric
-    elif atype == 'grass' or atype == 'bug': chosen_lottie = lottie_grass
-    else: chosen_lottie = lottie_fireworks # Fallback for others
-
-    # Show animation inside the placeholder
-    if chosen_lottie:
-        with animation_placeholder:
-            st_lottie(chosen_lottie, height=350, key=f"anim_{atype}_{time.time()}")
-        
-        # WAIT for 4 seconds, then CLEAR the animation
-        time.sleep(4)
-        animation_placeholder.empty() # This stops the loop by removing it!
 
 # Type Chart Logic
 type_chart = {
@@ -167,7 +139,6 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
     
     winner_name = p1_name if prediction == 0 else p2_name
     confidence = probs[0] if prediction == 0 else probs[1]
-    winner_type = p1_data['type1'] if prediction == 0 else p2_data['type1']
     
     st.success(f"🏆 THE WINNER IS: **{winner_name.upper()}**")
     st.metric(label="AI Confidence Level", value=f"{confidence*100:.1f}%")
@@ -176,6 +147,14 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
         st.caption(f"💡 Analysis: {p1_name} has a Type Advantage ({p1_mult}x damage)!")
     elif p2_mult > 1.0 and prediction == 1:
         st.caption(f"💡 Analysis: {p2_name} has a Type Advantage ({p2_mult}x damage)!")
-        
-    # 🔥 TRIGGER TEMPORARY EFFECT (Shows for 4 seconds then disappears)
-    show_victory_effect_temp(winner_type)
+
+    # 🔥 RANDOM CELEBRATION (Balloons OR Fireworks)
+    celebration = random.choice(["balloons", "fireworks"])
+    
+    if celebration == "balloons":
+        st.balloons()
+    else:
+        if lottie_fireworks:
+            st_lottie(lottie_fireworks, height=300, key=f"fireworks_{random.randint(0,1000)}")
+        else:
+            st.balloons() # Fallback if animation fails
