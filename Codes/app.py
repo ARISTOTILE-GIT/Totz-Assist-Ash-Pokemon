@@ -129,7 +129,7 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
         'p1_real_advantage': p1_mult,
         'p2_real_advantage': p2_mult
     }])
-    }])
+    
     
     prediction = model.predict(input_data)[0]
     probs = model.predict_proba(input_data)[0]
