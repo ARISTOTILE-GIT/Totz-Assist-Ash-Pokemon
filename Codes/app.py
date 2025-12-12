@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import joblib
@@ -8,13 +9,32 @@ st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", la
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv('pokemon_data.csv')
+    # Fix: Get the folder where app.py is located
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Construct the full path to the CSV
+    csv_path = os.path.join(current_dir, 'pokemon_data.csv')
+    
+    # Check if file exists (Safety Check)
+    if not os.path.exists(csv_path):
+        st.error(f"Error: Could not find file at {csv_path}")
+        return pd.DataFrame()
+        
+    df = pd.read_csv(csv_path)
     df['type2'] = df['type2'].fillna('None')
     return df
 
 @st.cache_resource
 def load_model():
-    return joblib.load('pokemon_battle_model_final.pkl')
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    model_path = os.path.join(current_dir, 'pokemon_battle_model_ultra.pkl')
+    
+    if not os.path.exists(model_path):
+        st.error(f" Error: Could not find model at {model_path}")
+        return None
+        
+    return joblib.load(model_path)
 
 df = load_data()
 model = load_model()
