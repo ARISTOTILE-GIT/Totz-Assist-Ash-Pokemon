@@ -259,7 +259,7 @@ st.write("")
 if st.button("See Who Is Going To Win The Battle", use_container_width=True):
     # Mirror Match Check
     if p1 == p2:
-        st.error("Bro, unnaku arivu illa rendum same pokemon choose panni iruka loose payalae")
+        st.error("Bro, unnaku arivu illa rendum same pokemon choose panni iruka loose payalae, vera pokemon choose pannu")
         st.stop()
     
     # Logic
