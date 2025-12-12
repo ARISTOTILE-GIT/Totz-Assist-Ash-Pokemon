@@ -112,7 +112,10 @@ with col3:
 # 4. PREDICTION LOGIC
 st.divider()
 if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary"):
-    
+
+    if p1_name == p2_name:
+        st.error("⚠️ Machi, rendume onnu! Orey Pokemon thannoda sanda poda mudiyathu. Vera ethavathu select pannu!")
+        st.stop()
     # Feature Calculation
     p1_mult = get_dual_type_multiplier(p1_data['type1'], p2_data['type1'], p2_data['type2'])
     p2_mult = get_dual_type_multiplier(p2_data['type1'], p1_data['type1'], p1_data['type2'])
