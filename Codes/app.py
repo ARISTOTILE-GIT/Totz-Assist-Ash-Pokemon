@@ -4,10 +4,72 @@ import joblib
 import os
 import requests
 import random
-import streamlit.components.v1 as components # 🔥 Required for HTML hack
+import streamlit.components.v1 as components 
 
 # 1. SETUP & LOADING
 st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", layout="wide")
+
+# ==========================================
+# 🎨 CUSTOM CSS FOR UI (Purple Button & Centering)
+# ==========================================
+st.markdown("""
+    <style>
+    /* 1. Center Title and Subtitle */
+    .main-title {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: bold;
+        color: #FFCB05; /* Pokemon Yellow */
+        text-shadow: 2px 2px #3B4CCA; /* Pokemon Blue Shadow */
+        margin-bottom: 10px;
+    }
+    .sub-title {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #cccccc;
+        margin-bottom: 30px;
+    }
+    
+    /* 2. Make the 'VS' text perfectly centered */
+    .vs-text {
+        text-align: center;
+        font-size: 50px;
+        font-weight: bold;
+        padding-top: 150px; /* Adjust vertical alignment */
+        color: #FF5733;
+    }
+
+    /* 3. PURPLE BUTTON STYLE */
+    div.stButton > button {
+        background-color: #8A2BE2; /* Purple Color */
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 10px;
+        padding: 10px 24px;
+        border: 2px solid #4B0082;
+        width: 100%;
+    }
+    div.stButton > button:hover {
+        background-color: #4B0082; /* Darker Purple on Hover */
+        color: #FFCB05;
+        border-color: #FFCB05;
+    }
+    
+    /* 4. Center Winner Text */
+    .winner-box {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #4CAF50; /* Green */
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 20px;
+        border-radius: 15px;
+        border: 2px solid #4CAF50;
+        margin-top: 20px;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
