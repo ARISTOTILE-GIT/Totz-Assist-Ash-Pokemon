@@ -10,7 +10,7 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", layout="wide")
 
 # ==========================================
-# 🎨 CUSTOM CSS FOR UI (Purple Button & Centering)
+# 🎨 CUSTOM CSS FOR UI (Purple Button, Centering, & Layout)
 # ==========================================
 st.markdown("""
     <style>
@@ -21,7 +21,7 @@ st.markdown("""
         font-weight: bold;
         color: #FFCB05; /* Pokemon Yellow */
         text-shadow: 2px 2px #3B4CCA; /* Pokemon Blue Shadow */
-        margin-bottom: 10px;
+        margin-bottom: 5px;
     }
     .sub-title {
         text-align: center;
@@ -35,7 +35,7 @@ st.markdown("""
         text-align: center;
         font-size: 50px;
         font-weight: bold;
-        padding-top: 150px; /* Adjust vertical alignment */
+        padding-top: 150px; /* Adjust vertical alignment based on image height */
         color: #FF5733;
     }
 
@@ -49,28 +49,41 @@ st.markdown("""
         padding: 10px 24px;
         border: 2px solid #4B0082;
         width: 100%;
+        transition: all 0.3s ease;
     }
     div.stButton > button:hover {
         background-color: #4B0082; /* Darker Purple on Hover */
         color: #FFCB05;
         border-color: #FFCB05;
+        transform: scale(1.02);
     }
     
-    /* 4. Center Winner Text */
+    /* 4. Center Winner Text Box */
     .winner-box {
         text-align: center;
         font-size: 2.5rem;
         font-weight: bold;
-        color: #4CAF50; /* Green */
-        background-color: rgba(0, 0, 0, 0.5);
+        color: #4CAF50; /* Green Text */
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
         padding: 20px;
         border-radius: 15px;
         border: 2px solid #4CAF50;
         margin-top: 20px;
+        box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+    }
+    
+    /* 5. Center Images */
+    [data-testid="stImage"] {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
     }
     </style>
 """, unsafe_allow_html=True)
 
+# ==========================================
+# 🛠️ LOAD DATA & MODEL (Path Fixed)
+# ==========================================
 @st.cache_data
 def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -85,6 +98,7 @@ def load_data():
 @st.cache_resource
 def load_model():
     current_dir = os.path.dirname(os.path.abspath(__file__))
+    # Make sure this matches your uploaded file name EXACTLY
     model_path = os.path.join(current_dir, 'pokemon_battle_model_ultra.pkl') 
     if not os.path.exists(model_path):
         st.error(f"❌ Error: Could not find model at {model_path}")
@@ -95,10 +109,10 @@ df = load_data()
 model = load_model()
 
 # ==========================================
-# 🔥 FULL SCREEN FIREWORKS FUNCTION
+# 🎆 FULL SCREEN FIREWORKS FUNCTION
 # ==========================================
 def run_fullscreen_fireworks():
-    # This HTML/JS code loads the Lottie animation and forces it to cover the ENTIRE screen
+    # HTML/JS Hack to force Lottie animation to cover the WHOLE screen
     fireworks_html = """
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
@@ -108,8 +122,8 @@ def run_fullscreen_fireworks():
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 99999; /* Super high z-index to be on top of everything */
-            pointer-events: none; /* Let users click through it */
+            z-index: 999999; /* Highest priority */
+            pointer-events: none; /* Allows clicking through the animation */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -126,9 +140,11 @@ def run_fullscreen_fireworks():
         </lottie-player>
     </div>
     """
-    components.html(fireworks_html, height=0, width=0) # Height 0 because it's fixed position
+    components.html(fireworks_html, height=0, width=0)
 
-# Type Chart Logic
+# ==========================================
+# 🧠 TYPE CHART LOGIC
+# ==========================================
 type_chart = {
     'fire': {'grass': 2.0, 'water': 0.5, 'bug': 2.0, 'ice': 2.0, 'dragon': 0.5, 'steel': 2.0, 'rock': 0.5, 'ground': 0.5},
     'water': {'fire': 2.0, 'ground': 2.0, 'rock': 2.0, 'grass': 0.5, 'dragon': 0.5},
@@ -156,15 +172,20 @@ def get_dual_type_multiplier(atk_type, def_type1, def_type2):
     mult2 = 1.0 if def_type2 == 'None' else type_chart.get(atk_type, {}).get(def_type2, 1.0)
     return mult1 * mult2
 
-# 2. UI HEADER
-st.title("⚡ AI Pokémon Battle Predictor ⚡")
-st.markdown("Select two Pokémon and let the **AI Model** predict the winner!")
+# ==========================================
+# 📱 UI LAYOUT
+# ==========================================
 
-# 3. SELECTION COLUMNS
-col1, col2, col3 = st.columns([1, 0.2, 1])
+# Centered Title & Subtitle using HTML/CSS classes defined above
+st.markdown('<h1 class="main-title">⚡ AI Pokémon Battle Predictor ⚡</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">Select two Pokémon and let the <b>AI Model</b> predict the winner!</p>', unsafe_allow_html=True)
+
+# Selection Columns
+# Using a [1, 0.3, 1] ratio to keep VS centered but tight
+col1, col2, col3 = st.columns([1, 0.3, 1]) 
 
 with col1:
-    st.header("Player 1")
+    st.markdown("<h2 style='text-align: center;'>Player 1</h2>", unsafe_allow_html=True)
     p1_name = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu
     p1_data = df[df['name'] == p1_name].iloc[0]
     
@@ -172,15 +193,14 @@ with col1:
     st.info(f"**{p1_data['name'].upper()}**")
     st.write(f"Type: {p1_data['type1']} / {p1_data['type2']}")
     st.progress(int(p1_data['hp']/255*100), text=f"HP: {p1_data['hp']}")
-    st.progress(int(p1_data['attack']/190*100), text=f"Attack: {p1_data['attack']}")
-    st.progress(int(p1_data['defense']/230*100), text=f"Defense: {p1_data['defense']}")
     st.write(f"**Total Power:** {p1_data['total_power']}")
 
 with col2:
-    st.markdown("<h1 style='text-align: center; padding-top: 150px;'>VS</h1>", unsafe_allow_html=True)
+    # VS Text centered via CSS class 'vs-text'
+    st.markdown('<div class="vs-text">VS</div>', unsafe_allow_html=True)
 
 with col3:
-    st.header("Player 2")
+    st.markdown("<h2 style='text-align: center;'>Player 2</h2>", unsafe_allow_html=True)
     p2_name = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard
     p2_data = df[df['name'] == p2_name].iloc[0]
     
@@ -188,23 +208,33 @@ with col3:
     st.info(f"**{p2_data['name'].upper()}**")
     st.write(f"Type: {p2_data['type1']} / {p2_data['type2']}")
     st.progress(int(p2_data['hp']/255*100), text=f"HP: {p2_data['hp']}")
-    st.progress(int(p2_data['attack']/190*100), text=f"Attack: {p2_data['attack']}")
-    st.progress(int(p2_data['defense']/230*100), text=f"Defense: {p2_data['defense']}")
     st.write(f"**Total Power:** {p2_data['total_power']}")
 
-# 4. PREDICTION LOGIC
-st.divider()
-if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary"):
-    
+# ==========================================
+# 🔥 PREDICTION BUTTON & LOGIC
+# ==========================================
+st.write("")
+st.write("") # Spacer
+
+# Center the button using columns
+b_col1, b_col2, b_col3 = st.columns([1, 2, 1])
+
+predict_pressed = False
+with b_col2:
+    # This button is PURPLE due to CSS
+    if st.button("🔥 PREDICT WINNER 🔥"):
+        predict_pressed = True
+
+if predict_pressed:
+    # 1. Mirror Match Check
     if p1_name == p2_name:
-        st.error("⚠️ Machi, rendume onnu! Orey Pokemon thannoda sanda poda mudiyathu. Vera ethavathu select pannu!")
+        st.error("⚠️ Machi, rendume onnu! Vera ethavathu select pannu!")
         st.stop()
     
-    # Feature Calculation
+    # 2. Feature Calculation
     p1_mult = get_dual_type_multiplier(p1_data['type1'], p2_data['type1'], p2_data['type2'])
     p2_mult = get_dual_type_multiplier(p2_data['type1'], p1_data['type1'], p1_data['type2'])
     
-    # Input Data
     input_data = pd.DataFrame([{
         'hp_diff': p1_data['hp'] - p2_data['hp'],
         'atk_diff': p1_data['attack'] - p2_data['attack'],
@@ -215,25 +245,22 @@ if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary
         'p2_real_advantage': p2_mult
     }])
     
+    # 3. Predict
     prediction = model.predict(input_data)[0]
     probs = model.predict_proba(input_data)[0]
     
     winner_name = p1_name if prediction == 0 else p2_name
     confidence = probs[0] if prediction == 0 else probs[1]
     
-    st.success(f"🏆 THE WINNER IS: **{winner_name.upper()}**")
-    st.metric(label="AI Confidence Level", value=f"{confidence*100:.1f}%")
+    # 4. Display Winner (Centered & Large)
+    st.markdown(f'<div class="winner-box">🏆 THE WINNER IS: {winner_name.upper()} 🏆</div>', unsafe_allow_html=True)
     
-    if p1_mult > 1.0 and prediction == 0:
-        st.caption(f"💡 Analysis: {p1_name} has a Type Advantage ({p1_mult}x damage)!")
-    elif p2_mult > 1.0 and prediction == 1:
-        st.caption(f"💡 Analysis: {p2_name} has a Type Advantage ({p2_mult}x damage)!")
-
-    # 🔥 RANDOM CELEBRATION (Full Screen Fireworks OR Balloons)
+    # 5. Display Confidence
+    st.markdown(f"<h3 style='text-align: center; color: white;'>AI Confidence: {confidence*100:.1f}%</h3>", unsafe_allow_html=True)
+    
+    # 6. Trigger Full Screen Fireworks or Balloons
     celebration = random.choice(["balloons", "fireworks"])
-    
     if celebration == "balloons":
         st.balloons()
     else:
-        # Calls the function to inject HTML/CSS for FULL SCREEN Fireworks
         run_fullscreen_fireworks()
