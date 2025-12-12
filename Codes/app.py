@@ -2,176 +2,245 @@ import streamlit as st
 import pandas as pd
 import joblib
 import os
-import requests
 import random
-import streamlit.components.v1 as components # 🔥 Required for HTML hack
+import streamlit.components.v1 as components
 
-# 1. SETUP & LOADING
-st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", layout="wide")
+# ======================================================
+# PAGE CONFIG
+# ======================================================
+st.set_page_config(
+    page_title="AI Pokémon Battle Arena",
+    page_icon="⚔️",
+    layout="wide"
+)
 
+# ======================================================
+# GLOBAL CSS (SPACING + CARD UI + ANIMATIONS)
+# ======================================================
+st.markdown("""
+<style>
+.block-container {
+    padding-top: 1rem !important;
+}
+
+h1 {
+    margin-top: -25px !important;
+}
+
+.poke-card {
+    background: linear-gradient(145deg, #0e1117, #161b22);
+    border-radius: 18px;
+    padding: 20px;
+    border: 1px solid #222;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.poke-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 0 30px rgba(77,163,255,0.45);
+}
+
+.winner-card {
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 0 45px rgba(255,215,0,0.9) !important;
+    animation: winnerPulse 1.6s infinite alternate;
+}
+
+@keyframes winnerPulse {
+    from { box-shadow: 0 0 25px rgba(255,215,0,0.6); }
+    to { box-shadow: 0 0 55px rgba(255,215,0,1); }
+}
+
+.poke-title {
+    background-color: #0d253f;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: bold;
+    text-align: center;
+    color: #4da3ff;
+    margin-bottom: 10px;
+}
+
+.poke-img {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.power-badge {
+    background: #162f46;
+    color: #ffd166;
+    text-align: center;
+    padding: 6px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ======================================================
+# LOAD DATA & MODEL
+# ======================================================
 @st.cache_data
 def load_data():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    csv_path = os.path.join(current_dir, 'pokemon_data.csv')
-    if not os.path.exists(csv_path):
-        st.error(f"❌ Error: Could not find file at {csv_path}")
-        return pd.DataFrame()
-    df = pd.read_csv(csv_path)
-    df['type2'] = df['type2'].fillna('None')
+    df = pd.read_csv("pokemon_data.csv")
+    df['type2'] = df['type2'].fillna("None")
     return df
 
 @st.cache_resource
 def load_model():
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(current_dir, 'pokemon_battle_model_ultra.pkl') 
-    if not os.path.exists(model_path):
-        st.error(f"❌ Error: Could not find model at {model_path}")
-        return None
-    return joblib.load(model_path)
+    return joblib.load("pokemon_battle_model_ultra.pkl")
 
 df = load_data()
 model = load_model()
 
-# ==========================================
-# 🔥 FULL SCREEN FIREWORKS FUNCTION
-# ==========================================
+# ======================================================
+# FIREWORKS
+# ======================================================
 def run_fullscreen_fireworks():
-    # This HTML/JS code loads the Lottie animation and forces it to cover the ENTIRE screen
     fireworks_html = """
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
         .fireworks-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 99999; /* Super high z-index to be on top of everything */
-            pointer-events: none; /* Let users click through it */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: transparent;
+            inset: 0;
+            z-index: 99999;
+            pointer-events: none;
         }
     </style>
     <div class="fireworks-container">
         <lottie-player 
-            src="https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json" 
-            background="transparent" 
-            speed="1" 
-            style="width: 100%; height: 100%;" 
+            src="https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json"
+            background="transparent"
+            speed="1"
+            style="width:100%; height:100%;"
             autoplay>
         </lottie-player>
     </div>
     """
-    components.html(fireworks_html, height=0, width=0) # Height 0 because it's fixed position
+    components.html(fireworks_html, height=0, width=0)
 
-# Type Chart Logic
+# ======================================================
+# TYPE CHART
+# ======================================================
 type_chart = {
-    'fire': {'grass': 2.0, 'water': 0.5, 'bug': 2.0, 'ice': 2.0, 'dragon': 0.5, 'steel': 2.0, 'rock': 0.5, 'ground': 0.5},
-    'water': {'fire': 2.0, 'ground': 2.0, 'rock': 2.0, 'grass': 0.5, 'dragon': 0.5},
-    'grass': {'water': 2.0, 'ground': 2.0, 'rock': 2.0, 'fire': 0.5, 'flying': 0.5, 'poison': 0.5, 'bug': 0.5, 'dragon': 0.5, 'steel': 0.5},
-    'electric': {'water': 2.0, 'flying': 2.0, 'ground': 0.0, 'grass': 0.5, 'dragon': 0.5, 'electric': 0.5},
-    'ice': {'grass': 2.0, 'ground': 2.0, 'flying': 2.0, 'dragon': 2.0, 'fire': 0.5, 'water': 0.5, 'ice': 0.5, 'steel': 0.5},
-    'fighting': {'normal': 2.0, 'ice': 2.0, 'rock': 2.0, 'dark': 2.0, 'steel': 2.0, 'psychic': 0.5, 'flying': 0.5, 'bug': 0.5, 'poison': 0.5, 'fairy': 0.5},
-    'poison': {'grass': 2.0, 'fairy': 2.0, 'poison': 0.5, 'ground': 0.5, 'rock': 0.5, 'ghost': 0.5, 'steel': 0.0},
-    'ground': {'fire': 2.0, 'electric': 2.0, 'poison': 2.0, 'rock': 2.0, 'steel': 2.0, 'grass': 0.5, 'bug': 0.5, 'flying': 0.0},
-    'flying': {'grass': 2.0, 'fighting': 2.0, 'bug': 2.0, 'electric': 0.5, 'rock': 0.5, 'steel': 0.5},
-    'psychic': {'fighting': 2.0, 'poison': 2.0, 'psychic': 0.5, 'steel': 0.5, 'dark': 0.0},
-    'bug': {'grass': 2.0, 'psychic': 2.0, 'dark': 2.0, 'fire': 0.5, 'fighting': 0.5, 'flying': 0.5, 'ghost': 0.5, 'steel': 0.5, 'fairy': 0.5},
-    'rock': {'fire': 2.0, 'ice': 2.0, 'flying': 2.0, 'bug': 2.0, 'fighting': 0.5, 'ground': 0.5, 'steel': 0.5},
-    'ghost': {'psychic': 2.0, 'ghost': 2.0, 'dark': 0.5, 'normal': 0.0},
-    'dragon': {'dragon': 2.0, 'steel': 0.5, 'fairy': 0.0},
-    'steel': {'ice': 2.0, 'rock': 2.0, 'fairy': 2.0, 'fire': 0.5, 'water': 0.5, 'electric': 0.5, 'steel': 0.5},
-    'dark': {'psychic': 2.0, 'ghost': 2.0, 'fighting': 0.5, 'dark': 0.5, 'fairy': 0.5},
-    'fairy': {'fighting': 2.0, 'dragon': 2.0, 'dark': 2.0, 'fire': 0.5, 'poison': 0.5, 'steel': 0.5},
-    'normal': {'rock': 0.5, 'ghost': 0.0, 'steel': 0.5},
+    'fire': {'grass': 2.0, 'water': 0.5},
+    'water': {'fire': 2.0, 'grass': 0.5},
+    'grass': {'water': 2.0, 'fire': 0.5},
+    'electric': {'water': 2.0, 'ground': 0.0},
     'None': {}
 }
 
-def get_dual_type_multiplier(atk_type, def_type1, def_type2):
-    mult1 = type_chart.get(atk_type, {}).get(def_type1, 1.0)
-    mult2 = 1.0 if def_type2 == 'None' else type_chart.get(atk_type, {}).get(def_type2, 1.0)
-    return mult1 * mult2
+def get_multiplier(atk, d1, d2):
+    m1 = type_chart.get(atk, {}).get(d1, 1.0)
+    m2 = 1.0 if d2 == "None" else type_chart.get(atk, {}).get(d2, 1.0)
+    return m1 * m2
 
-# 2. UI HEADER
-st.title("⚡ AI Pokémon Battle Predictor ⚡")
-st.markdown("Select two Pokémon and let the **AI Model** predict the winner!")
+# ======================================================
+# SESSION STATE
+# ======================================================
+if "winner" not in st.session_state:
+    st.session_state.winner = None
 
-# 3. SELECTION COLUMNS
+# ======================================================
+# HEADER
+# ======================================================
+st.markdown("""
+<h1 style="text-align:center;">⚡ AI Pokémon Battle Predictor ⚡</h1>
+<p style="text-align:center; color:#cfcfcf;">
+Select two Pokémon and let the <b>AI Model</b> predict the winner!
+</p>
+""", unsafe_allow_html=True)
+
+# ======================================================
+# LAYOUT
+# ======================================================
 col1, col2, col3 = st.columns([1, 0.2, 1])
 
+# ---------------- PLAYER 1 ----------------
 with col1:
     st.header("Player 1")
-    p1_name = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu
-    p1_data = df[df['name'] == p1_name].iloc[0]
-    
-    st.image(f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p1_data['id']}.png", width=200)
-    st.info(f"**{p1_data['name'].upper()}**")
-    st.write(f"Type: {p1_data['type1']} / {p1_data['type2']}")
-    st.progress(int(p1_data['hp']/255*100), text=f"HP: {p1_data['hp']}")
-    st.progress(int(p1_data['attack']/190*100), text=f"Attack: {p1_data['attack']}")
-    st.progress(int(p1_data['defense']/230*100), text=f"Defense: {p1_data['defense']}")
-    st.write(f"**Total Power:** {p1_data['total_power']}")
+    p1 = st.selectbox("Choose Pokémon 1", df['name'], index=24)
+    d1 = df[df['name'] == p1].iloc[0]
 
+    glow1 = "winner-card" if st.session_state.winner == p1 else ""
+
+    st.markdown(f"""
+    <div class="poke-card {glow1}">
+        <div class="poke-img">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d1['id']}.png" width="160">
+        </div>
+        <div class="poke-title">{p1.upper()}</div>
+        <div>Type: {d1['type1']} / {d1['type2']}</div>
+        <div class="power-badge">⚡ TOTAL POWER: {d1['total_power']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.progress(int(d1['hp']/255*100), f"HP: {d1['hp']}")
+    st.progress(int(d1['attack']/190*100), f"Attack: {d1['attack']}")
+    st.progress(int(d1['defense']/230*100), f"Defense: {d1['defense']}")
+
+# ---------------- VS ----------------
 with col2:
-    st.markdown("<h1 style='text-align: center; padding-top: 150px;'>VS</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center; margin-top:130px;'>VS</h1>", unsafe_allow_html=True)
 
+# ---------------- PLAYER 2 ----------------
 with col3:
     st.header("Player 2")
-    p2_name = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard
-    p2_data = df[df['name'] == p2_name].iloc[0]
-    
-    st.image(f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p2_data['id']}.png", width=200)
-    st.info(f"**{p2_data['name'].upper()}**")
-    st.write(f"Type: {p2_data['type1']} / {p2_data['type2']}")
-    st.progress(int(p2_data['hp']/255*100), text=f"HP: {p2_data['hp']}")
-    st.progress(int(p2_data['attack']/190*100), text=f"Attack: {p2_data['attack']}")
-    st.progress(int(p2_data['defense']/230*100), text=f"Defense: {p2_data['defense']}")
-    st.write(f"**Total Power:** {p2_data['total_power']}")
+    p2 = st.selectbox("Choose Pokémon 2", df['name'], index=5)
+    d2 = df[df['name'] == p2].iloc[0]
 
-# 4. PREDICTION LOGIC
+    glow2 = "winner-card" if st.session_state.winner == p2 else ""
+
+    st.markdown(f"""
+    <div class="poke-card {glow2}">
+        <div class="poke-img">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d2['id']}.png" width="160">
+        </div>
+        <div class="poke-title">{p2.upper()}</div>
+        <div>Type: {d2['type1']} / {d2['type2']}</div>
+        <div class="power-badge">⚡ TOTAL POWER: {d2['total_power']}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.progress(int(d2['hp']/255*100), f"HP: {d2['hp']}")
+    st.progress(int(d2['attack']/190*100), f"Attack: {d2['attack']}")
+    st.progress(int(d2['defense']/230*100), f"Defense: {d2['defense']}")
+
+# ======================================================
+# PREDICTION
+# ======================================================
 st.divider()
-if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True, type="primary"):
-    
-    if p1_name == p2_name:
-        st.error("⚠️ Machi, rendume onnu! Orey Pokemon thannoda sanda poda mudiyathu. Vera ethavathu select pannu!")
-        st.stop()
-    
-    # Feature Calculation
-    p1_mult = get_dual_type_multiplier(p1_data['type1'], p2_data['type1'], p2_data['type2'])
-    p2_mult = get_dual_type_multiplier(p2_data['type1'], p1_data['type1'], p1_data['type2'])
-    
-    # Input Data
-    input_data = pd.DataFrame([{
-        'hp_diff': p1_data['hp'] - p2_data['hp'],
-        'atk_diff': p1_data['attack'] - p2_data['attack'],
-        'def_diff': p1_data['defense'] - p2_data['defense'],
-        'spd_diff': p1_data['speed'] - p2_data['speed'],
-        'total_power_diff': p1_data['total_power'] - p2_data['total_power'],
-        'p1_real_advantage': p1_mult,
-        'p2_real_advantage': p2_mult
-    }])
-    
-    prediction = model.predict(input_data)[0]
-    probs = model.predict_proba(input_data)[0]
-    
-    winner_name = p1_name if prediction == 0 else p2_name
-    confidence = probs[0] if prediction == 0 else probs[1]
-    
-    st.success(f"🏆 THE WINNER IS: **{winner_name.upper()}**")
-    st.metric(label="AI Confidence Level", value=f"{confidence*100:.1f}%")
-    
-    if p1_mult > 1.0 and prediction == 0:
-        st.caption(f"💡 Analysis: {p1_name} has a Type Advantage ({p1_mult}x damage)!")
-    elif p2_mult > 1.0 and prediction == 1:
-        st.caption(f"💡 Analysis: {p2_name} has a Type Advantage ({p2_mult}x damage)!")
 
-    # 🔥 RANDOM CELEBRATION (Full Screen Fireworks OR Balloons)
-    celebration = random.choice(["balloons", "fireworks"])
-    
-    if celebration == "balloons":
-        st.balloons()
-    else:
-        # Calls the function to inject HTML/CSS for FULL SCREEN Fireworks
-        run_fullscreen_fireworks()
+if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True):
+    if p1 == p2:
+        st.error("⚠️ Machi rendume same Pokémon da!")
+        st.stop()
+
+    m1 = get_multiplier(d1['type1'], d2['type1'], d2['type2'])
+    m2 = get_multiplier(d2['type1'], d1['type1'], d1['type2'])
+
+    X = pd.DataFrame([{
+        "hp_diff": d1['hp'] - d2['hp'],
+        "atk_diff": d1['attack'] - d2['attack'],
+        "def_diff": d1['defense'] - d2['defense'],
+        "spd_diff": d1['speed'] - d2['speed'],
+        "total_power_diff": d1['total_power'] - d2['total_power'],
+        "p1_real_advantage": m1,
+        "p2_real_advantage": m2
+    }])
+
+    pred = model.predict(X)[0]
+    probs = model.predict_proba(X)[0]
+
+    winner = p1 if pred == 0 else p2
+    confidence = probs[pred] * 100
+
+    st.session_state.winner = winner
+
+    st.success(f"🏆 WINNER: **{winner.upper()}**")
+    st.metric("AI Confidence", f"{confidence:.1f}%")
+
+    random.choice([st.balloons, run_fullscreen_fireworks])()
