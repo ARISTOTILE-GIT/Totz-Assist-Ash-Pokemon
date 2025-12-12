@@ -14,7 +14,7 @@ st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", la
 # ==========================================
 st.markdown("""
     <style>
-    /* 1. Reduce Top White Space (Title Mela pogum) */
+    /* 1. Reduce Top White Space */
     .block-container {
         padding-top: 1rem;
         padding-bottom: 1rem;
@@ -45,7 +45,7 @@ st.markdown("""
         color: #FF5733;
     }
 
-    /* 4. BUTTON STYLE (Full Width & Purple) */
+    /* 4. BUTTON STYLE (FULL SCREEN WIDTH) */
     div.stButton > button {
         background-color: #8A2BE2; /* Purple */
         color: white;
@@ -53,8 +53,9 @@ st.markdown("""
         font-size: 20px;
         border-radius: 8px;
         border: 2px solid #4B0082;
-        width: 100%; /* Makes it LENGTHY like old times */
-        height: 60px; /* Thicker button */
+        width: 100% !important; /* 🔥 FORCES FULL WIDTH */
+        height: 60px;
+        margin-top: 10px;
         transition: all 0.3s ease;
     }
     div.stButton > button:hover {
@@ -74,8 +75,8 @@ st.markdown("""
         padding: 20px;
         border-radius: 10px;
         border: 2px solid #4CAF50;
-        margin-top: 30px; /* Space above winner box */
-        margin-bottom: 20px; /* Space below winner box */
+        margin-top: 30px;
+        margin-bottom: 20px;
     }
     
     /* 6. Center Images & Text */
@@ -175,7 +176,6 @@ def get_dual_type_multiplier(atk_type, def_type1, def_type2):
 # 📱 UI LAYOUT
 # ==========================================
 
-# Centered Title
 st.markdown('<h1 class="main-title">⚡ AI Pokémon Battle Predictor ⚡</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">Select two Pokémon and let the <b>AI Model</b> predict the winner!</p>', unsafe_allow_html=True)
 
@@ -189,14 +189,12 @@ with col1:
     
     st.image(f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p1_data['id']}.png", width=200)
     
-    # Centered Stats
     st.info(f"**{p1_data['name'].upper()}**")
     st.markdown(f"<div class='centered-text'>Type: {p1_data['type1']} / {p1_data['type2']}</div>", unsafe_allow_html=True)
     st.progress(int(p1_data['hp']/255*100), text=f"HP: {p1_data['hp']}")
     st.markdown(f"<div class='centered-text'><b>Total Power: {p1_data['total_power']}</b></div>", unsafe_allow_html=True)
 
 with col2:
-    # VS Text
     st.markdown('<div class="vs-text">VS</div>', unsafe_allow_html=True)
 
 with col3:
@@ -206,19 +204,18 @@ with col3:
     
     st.image(f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p2_data['id']}.png", width=200)
     
-    # Centered Stats
     st.info(f"**{p2_data['name'].upper()}**")
     st.markdown(f"<div class='centered-text'>Type: {p2_data['type1']} / {p2_data['type2']}</div>", unsafe_allow_html=True)
     st.progress(int(p2_data['hp']/255*100), text=f"HP: {p2_data['hp']}")
     st.markdown(f"<div class='centered-text'><b>Total Power: {p2_data['total_power']}</b></div>", unsafe_allow_html=True)
 
 # ==========================================
-# 🔥 PREDICTION BUTTON & LOGIC
+# 🔥 PREDICTION BUTTON (FULL WIDTH)
 # ==========================================
 st.write("")
 st.write("") 
 
-# REMOVED COLUMNS for button -> Makes it FULL WIDTH (Lengthy)
+# NO COLUMNS HERE -> This makes the button take 100% width of the container
 if st.button("🔥 PREDICT WINNER 🔥"):
     
     # Mirror Match Check
@@ -249,7 +246,7 @@ if st.button("🔥 PREDICT WINNER 🔥"):
     # Large Centered Winner Box
     st.markdown(f'<div class="winner-box">🏆 THE WINNER IS: {winner_name.upper()} 🏆</div>', unsafe_allow_html=True)
     
-    # Confidence Score (With good spacing)
+    # Confidence Score
     st.markdown(f"<h3 style='text-align: center; color: white; margin-bottom: 30px;'>AI Confidence: {confidence*100:.1f}%</h3>", unsafe_allow_html=True)
     
     # Full Screen Celebration
