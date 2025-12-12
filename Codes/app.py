@@ -10,15 +10,14 @@ import streamlit.components.v1 as components
 st.set_page_config(page_title="AI Pokémon Battle Arena", page_icon="⚔️", layout="wide")
 
 # ==========================================
-# 🎨 CUSTOM CSS FOR UI (UI TWEAKS)
+# 🎨 CUSTOM CSS FOR UI
 # ==========================================
 st.markdown("""
     <style>
-    /* 1. Reduce Top White Space */
+    /* 1. Reduce Top White Space (Title Mela pogum) */
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1rem;
         padding-bottom: 1rem;
-        margin-top: 0rem;
     }
     
     /* 2. Center Title and Subtitle */
@@ -34,7 +33,7 @@ st.markdown("""
         text-align: center;
         font-size: 1.1rem;
         color: #888888;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
     }
     
     /* 3. VS Text Centered */
@@ -46,39 +45,40 @@ st.markdown("""
         color: #FF5733;
     }
 
-    /* 4. BUTTON STYLE (Old Size, Purple Color) */
+    /* 4. BUTTON STYLE (Full Width & Purple) */
     div.stButton > button {
         background-color: #8A2BE2; /* Purple */
         color: white;
         font-weight: bold;
+        font-size: 20px;
         border-radius: 8px;
         border: 2px solid #4B0082;
-        /* Padding removed to keep size normal */
-        width: 100%;
+        width: 100%; /* Makes it LENGTHY like old times */
+        height: 60px; /* Thicker button */
         transition: all 0.3s ease;
     }
     div.stButton > button:hover {
         background-color: #4B0082;
         color: #FFCB05;
         border-color: #FFCB05;
-        transform: scale(1.02);
+        transform: scale(1.01);
     }
     
-    /* 5. Winner Box (Added Margin Bottom for spacing) */
+    /* 5. Winner Box */
     .winner-box {
         text-align: center;
         font-size: 2.2rem;
         font-weight: bold;
         color: #4CAF50;
         background-color: rgba(0, 0, 0, 0.6);
-        padding: 15px;
+        padding: 20px;
         border-radius: 10px;
         border: 2px solid #4CAF50;
-        margin-top: 20px;
-        margin-bottom: 20px; /* Gap added here */
+        margin-top: 30px; /* Space above winner box */
+        margin-bottom: 20px; /* Space below winner box */
     }
     
-    /* 6. Center Images & Text inside Columns */
+    /* 6. Center Images & Text */
     [data-testid="stImage"] {
         display: block;
         margin-left: auto;
@@ -86,8 +86,9 @@ st.markdown("""
     }
     .centered-text {
         text-align: center;
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 500;
+        margin-bottom: 5px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -174,7 +175,7 @@ def get_dual_type_multiplier(atk_type, def_type1, def_type2):
 # 📱 UI LAYOUT
 # ==========================================
 
-# Centered Title & Subtitle
+# Centered Title
 st.markdown('<h1 class="main-title">⚡ AI Pokémon Battle Predictor ⚡</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">Select two Pokémon and let the <b>AI Model</b> predict the winner!</p>', unsafe_allow_html=True)
 
@@ -188,13 +189,14 @@ with col1:
     
     st.image(f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p1_data['id']}.png", width=200)
     
-    # Centered Info
+    # Centered Stats
     st.info(f"**{p1_data['name'].upper()}**")
     st.markdown(f"<div class='centered-text'>Type: {p1_data['type1']} / {p1_data['type2']}</div>", unsafe_allow_html=True)
     st.progress(int(p1_data['hp']/255*100), text=f"HP: {p1_data['hp']}")
     st.markdown(f"<div class='centered-text'><b>Total Power: {p1_data['total_power']}</b></div>", unsafe_allow_html=True)
 
 with col2:
+    # VS Text
     st.markdown('<div class="vs-text">VS</div>', unsafe_allow_html=True)
 
 with col3:
@@ -204,7 +206,7 @@ with col3:
     
     st.image(f"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{p2_data['id']}.png", width=200)
     
-    # Centered Info
+    # Centered Stats
     st.info(f"**{p2_data['name'].upper()}**")
     st.markdown(f"<div class='centered-text'>Type: {p2_data['type1']} / {p2_data['type2']}</div>", unsafe_allow_html=True)
     st.progress(int(p2_data['hp']/255*100), text=f"HP: {p2_data['hp']}")
@@ -216,14 +218,10 @@ with col3:
 st.write("")
 st.write("") 
 
-b_col1, b_col2, b_col3 = st.columns([1, 2, 1])
-
-predict_pressed = False
-with b_col2:
-    if st.button("🔥 PREDICT WINNER 🔥"):
-        predict_pressed = True
-
-if predict_pressed:
+# REMOVED COLUMNS for button -> Makes it FULL WIDTH (Lengthy)
+if st.button("🔥 PREDICT WINNER 🔥"):
+    
+    # Mirror Match Check
     if p1_name == p2_name:
         st.error("⚠️ Machi, rendume onnu! Vera ethavathu select pannu!")
         st.stop()
@@ -248,13 +246,13 @@ if predict_pressed:
     winner_name = p1_name if prediction == 0 else p2_name
     confidence = probs[0] if prediction == 0 else probs[1]
     
-    # Large Centered Winner Box (with Margin Bottom)
+    # Large Centered Winner Box
     st.markdown(f'<div class="winner-box">🏆 THE WINNER IS: {winner_name.upper()} 🏆</div>', unsafe_allow_html=True)
     
-    # Confidence Score (Separated by Margin)
-    st.markdown(f"<h3 style='text-align: center; color: white;'>AI Confidence: {confidence*100:.1f}%</h3>", unsafe_allow_html=True)
+    # Confidence Score (With good spacing)
+    st.markdown(f"<h3 style='text-align: center; color: white; margin-bottom: 30px;'>AI Confidence: {confidence*100:.1f}%</h3>", unsafe_allow_html=True)
     
-    # Fireworks/Balloons
+    # Full Screen Celebration
     celebration = random.choice(["balloons", "fireworks"])
     if celebration == "balloons":
         st.balloons()
