@@ -93,8 +93,6 @@ div.stButton > button {
     border-radius: 8px;
     border: none;
     transition: all 0.3s;
-    /* Note: use_container_width=True in Python handles the width now, 
-       but we keep this just in case */
     width: 100%; 
 }
 div.stButton > button:hover {
@@ -225,7 +223,8 @@ with col1:
 
 # --- VS TEXT ---
 with col2:
-    st.markdown("<h1 style='text-align:center; padding-top:160px; color:#FF5733;'>VS</h1>", unsafe_allow_html=True)
+    # 🔥 FIX: Increased padding-top to 220px to push it down further
+    st.markdown("<h1 style='text-align:center; padding-top:220px; font-size:50px; color:#FF5733;'>VS</h1>", unsafe_allow_html=True)
 
 # --- PLAYER 2 UI ---
 with col3:
@@ -256,10 +255,10 @@ st.write("")
 st.write("")
 
 # 🔥 BUTTON FIX: use_container_width=True forces it to fill the screen width!
-if st.button("See Who Is Going To Win The Battle", use_container_width=True):
+if st.button("🔥 PREDICT WINNER 🔥", use_container_width=True):
     # Mirror Match Check
     if p1 == p2:
-        st.error("Bro, unnaku arivu illa rendum same pokemon choose panni iruka loose payalae, vera pokemon choose pannu")
+        st.error("⚠️ Machi, rendume onnu! Vera ethavathu select pannu!")
         st.stop()
     
     # Logic
@@ -290,10 +289,10 @@ if st.button("See Who Is Going To Win The Battle", use_container_width=True):
 
 # Display Winner Text (Persists after reload)
 if st.session_state.winner:
-    
+    # 🔥 BOX FIX: Slim padding (10px)
     st.markdown(f"""
-    <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(0,0,0,0.5); border-radius:10px; border:2px solid #4CAF50;">
-        <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">THE BATTLE IS WON BY : {st.session_state.winner.upper()} </h2>
+    <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.5); border-radius:10px; border:2px solid #4CAF50;">
+        <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">🏆 THE WINNER IS: {st.session_state.winner.upper()} 🏆</h2>
     </div>
     <h3 style="text-align:center; color:white; margin-top:5px;">AI Confidence: {99.0}%</h3>
     """, unsafe_allow_html=True)
