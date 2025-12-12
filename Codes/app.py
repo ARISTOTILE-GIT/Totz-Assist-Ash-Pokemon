@@ -83,18 +83,7 @@ h1 {
     display: inline-block;
 }
 
-/* FULL WIDTH BUTTON */
-div.stButton > button {
-    width: 100%;
-    background-color: #8A2BE2;
-    color: white;
-    font-weight: bold;
-    font-size: 20px;
-    padding: 15px;
-    border-radius: 10px;
-    border: 2px solid #4B0082;
-    transition: all 0.3s;
-}
+
 div.stButton > button:hover {
     background-color: #4B0082;
     color: #FFCB05;
