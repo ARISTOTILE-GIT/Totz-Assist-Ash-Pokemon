@@ -16,38 +16,35 @@ st.set_page_config(
 )
 
 # ======================================================
-# 2. SESSION STATE (For Start Screen)
+# 2. SESSION STATE
 # ======================================================
 if "game_started" not in st.session_state:
     st.session_state.game_started = False
 
 # ======================================================
-# 3. GLOBAL CSS (THE NEW PREMIUM WHITE THEME + WIDGET FIXES)
+# 3. GLOBAL CSS (FIXED PROGRESS BAR)
 # ======================================================
 st.markdown("""
 <style>
-/* IMPORT GOOGLE FONT - POPPINS */
+/* IMPORT FONT */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap');
 
-/* APPLY FONT & BOLD GLOBALLY */
+/* GLOBAL STYLES */
 html, body, [class*="css"] {
     font-family: 'Poppins', sans-serif !important;
     font-weight: 700 !important;
     color: #ffffff !important;
 }
 
-/* 1px TEXT BORDER SHADOW MASK (For Readability) */
+/* TEXT SHADOW FOR READABILITY */
 h1, h2, h3, p, div, span, button, .poke-name, .subtitle, label {
     text-shadow: 
-        -1px -1px 0 #000,  
-         1px -1px 0 #000,
-        -1px  1px 0 #000,
-         1px  1px 0 #000 !important;
+        -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000 !important;
 }
 
 .block-container { padding-top: 1rem !important; }
 
-/* MAIN TITLES */
+/* TITLES */
 h1 { 
     margin-top: -20px !important; 
     text-align: center; 
@@ -69,7 +66,7 @@ h1 {
     font-size: 1.2rem !important;
 }
 
-/* 🔥 WHITE GLASS CARD STYLE */
+/* CARDS */
 .poke-card {
     background: rgba(255, 255, 255, 0.15); 
     border-radius: 25px;
@@ -97,12 +94,10 @@ h1 {
 }
 @keyframes pulse { from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); } to { box-shadow: 0 0 70px rgba(255, 215, 0, 1.0); } }
 
-/* TEXT STYLES */
 .poke-name { font-size: 1.8rem !important; font-weight: 800 !important; color: #fff !important; margin-top: 15px; }
-.poke-type { color: #eee !important; font-size: 1.1rem; margin-bottom: 10px; }
 .power-badge { background: rgba(0,0,0,0.5); color: #FFCB05 !important; padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; margin-top: 10px; display: inline-block; border: 3px solid #FFCB05; }
 
-/* FIX: CUSTOMIZE SELECTBOX (POKEMON SELECTOR) TO WHITE GLASS */
+/* DROPDOWN STYLE */
 div[data-baseweb="select"] > div {
     background-color: rgba(255, 255, 255, 0.2) !important;
     color: white !important;
@@ -115,17 +110,8 @@ div[data-baseweb="select"] svg { fill: white !important; }
 div[data-baseweb="popover"] { background-color: rgba(20, 20, 30, 0.95) !important; border: 1px solid rgba(255, 255, 255, 0.3); }
 div[data-baseweb="menu"] li { color: white !important; }
 
-/* 🔥 FIX: PROGRESS BARS (HP/ATK/DEF) */
-/* The filled part (Blue) */
-.stProgress > div > div > div > div {
-    background-color: #3B4CCA !important; /* Pokemon Blue */
-}
-/* The background track part (White Glassy now) */
-.stProgress > div > div {
-    background-color: rgba(255, 255, 255, 0.25) !important;
-    border-radius: 10px;
-}
-/* The Labels (HP: 100) */
+/* 🔥 PROGRESS BAR FIX 🔥 */
+/* 1. The Text Label (HP: 35) - Keep it clear */
 .stProgress p {
     font-size: 1rem !important;
     font-weight: 800 !important;
@@ -133,7 +119,18 @@ div[data-baseweb="menu"] li { color: white !important; }
     margin-bottom: 5px !important;
 }
 
-/* PURPLE BUTTON */
+/* 2. The Filled Bar (Blue Color) */
+[data-testid="stProgress"] > div > div > div > div {
+    background-color: #3B4CCA !important;
+}
+
+/* 3. The Empty Track (White Glass) - ONLY the bar background */
+[data-testid="stProgress"] > div > div > div {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    border-radius: 10px;
+}
+
+/* BUTTON */
 div.stButton > button { 
     width: 100%; 
     background-color: #8A2BE2; 
@@ -157,7 +154,6 @@ div.stButton > button:hover {
 </style>
 """, unsafe_allow_html=True)
 
-
 # ======================================================
 # 4. BACKGROUND VIDEO FUNCTION
 # ======================================================
@@ -178,27 +174,16 @@ def set_background_video(video_filename):
     
     video_html = f"""
     <style>
-    .stApp {{
-        background: none;
-    }}
+    .stApp {{ background: none; }}
     #myVideo {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        z-index: -1;
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        object-fit: cover; z-index: -1;
     }}
-    header {{
-        background-color: rgba(0,0,0,0) !important;
-    }}
+    header {{ background-color: rgba(0,0,0,0) !important; }}
     </style>
-    
     <video autoplay loop id="myVideo">
         <source src="data:video/mp4;base64,{bin_str}" type="video/mp4">
     </video>
-    
     <script>
         var video = document.getElementById("myVideo");
         video.muted = false;
@@ -209,7 +194,7 @@ def set_background_video(video_filename):
     st.markdown(video_html, unsafe_allow_html=True)
 
 # ======================================================
-# 5. SPLASH SCREEN (CLICK TO START)
+# 5. SPLASH SCREEN
 # ======================================================
 if not st.session_state.game_started:
     st.markdown("""
@@ -242,30 +227,24 @@ if not st.session_state.game_started:
         st.markdown("<div class='start-container'><h1 class='big-title'>POKÉMON<br>BATTLE ARENA</h1></div>", unsafe_allow_html=True)
         st.write("")
         st.write("")
-        
         with st.container():
              st.markdown('<div class="start-btn-container">', unsafe_allow_html=True)
              if st.button("🔊 CLICK TO ENTER ARENA 🔊", use_container_width=True):
                  st.session_state.game_started = True
                  st.rerun()
              st.markdown('</div>', unsafe_allow_html=True)
-            
     st.stop()
 
 # ======================================================
-# 🚀 MAIN APP (Runs ONLY after 'Start' is clicked)
+# 🚀 MAIN APP
 # ======================================================
-
-# 1. LOAD VIDEO
 set_background_video('background.mp4')
 
-# 2. LOAD DATA & MODEL
 @st.cache_data
 def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(current_dir, 'pokemon_data.csv')
-    if not os.path.exists(csv_path):
-        return pd.DataFrame()
+    if not os.path.exists(csv_path): return pd.DataFrame()
     df = pd.read_csv(csv_path)
     df['type2'] = df['type2'].fillna("None")
     return df
@@ -274,14 +253,12 @@ def load_data():
 def load_model():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(current_dir, 'pokemon_battle_model_ultra.pkl')
-    if not os.path.exists(model_path):
-        return None
+    if not os.path.exists(model_path): return None
     return joblib.load(model_path)
 
 df = load_data()
 model = load_model()
 
-# 4. MULTIPLIER LOGIC
 type_chart = {
     'fire': {'grass': 2.0, 'water': 0.5, 'bug': 2.0, 'ice': 2.0, 'dragon': 0.5, 'steel': 2.0, 'rock': 0.5, 'ground': 0.5},
     'water': {'fire': 2.0, 'ground': 2.0, 'rock': 2.0, 'grass': 0.5, 'dragon': 0.5},
@@ -308,9 +285,6 @@ def get_multiplier(atk, d1, d2):
     m2 = 1.0 if d2 == "None" else type_chart.get(atk, {}).get(d2, 1.0)
     return m1 * m2
 
-# ======================================================
-# 5. FIREWORKS FUNCTION
-# ======================================================
 def run_fullscreen_fireworks():
     fireworks_html = """
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
@@ -321,9 +295,6 @@ def run_fullscreen_fireworks():
     """
     components.html(fireworks_html, height=0, width=0)
 
-# ======================================================
-# 6. SESSION STATE & CELEBRATION
-# ======================================================
 if "winner" not in st.session_state: st.session_state.winner = None
 if "celebrate" not in st.session_state: st.session_state.celebrate = False
 
@@ -331,9 +302,6 @@ if st.session_state.celebrate:
     random.choice([st.balloons, run_fullscreen_fireworks])()
     st.session_state.celebrate = False
 
-# ======================================================
-# 7. UI LAYOUT
-# ======================================================
 with st.container():
     st.markdown("<h1>⚡ POKÉMON BATTLE PREDICTOR ⚡</h1>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center;'><p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p></div>", unsafe_allow_html=True)
@@ -358,7 +326,6 @@ with col1:
     st.progress(int(d1['defense']/230*100), f"DEF: {d1['defense']}")
 
 with col2:
-    # Adjusted VS text size and padding for bold font
     st.markdown("<h1 style='text-align:center; margin-left:20px; padding-top:240px; font-size:60px; color:#FF5733 !important;'>VS</h1>", unsafe_allow_html=True)
 
 with col3:
@@ -378,12 +345,9 @@ with col3:
     st.progress(int(d2['attack']/190*100), f"ATK: {d2['attack']}")
     st.progress(int(d2['defense']/230*100), f"DEF: {d2['defense']}")
 
-# ======================================================
-# 8. PREDICTION LOGIC
-# ======================================================
 st.write("")
 st.write("")
-st.write("") # Extra spacing before button
+st.write("") 
 
 if st.button("⚔️ SEE WHO IS GOING TO WIN THE BATTLE ⚔️", use_container_width=True):
     if p1 == p2:
@@ -407,7 +371,6 @@ if st.button("⚔️ SEE WHO IS GOING TO WIN THE BATTLE ⚔️", use_container_w
     st.rerun()
 
 if st.session_state.winner:
-    # Updated Winner box to match white glass theme with green tint
     st.markdown(f"""
     <div style="text-align:center; margin-top:20px; margin-bottom:10px; padding:15px; background:rgba(76, 175, 80, 0.3); border-radius:20px; border:3px solid #4CAF50; backdrop-filter: blur(15px); box-shadow: 0 0 30px rgba(76, 175, 80, 0.5);">
         <h2 style="color:#fff; margin:0; font-size: 2rem; text-shadow: 2px 2px 0 #000;">🏆 THE BATTLE IS WON BY : {st.session_state.winner.upper()} 🏆</h2>
