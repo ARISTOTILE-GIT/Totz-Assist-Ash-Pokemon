@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ======================================================
-# 🎥 BACKGROUND VIDEO (MOUSE MOVE UNMUTE)
+# 🎥 BACKGROUND VIDEO WITH AUDIO
 # ======================================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -28,11 +28,12 @@ def set_background_video(video_filename):
     video_path = os.path.join(current_dir, video_filename)
     
     if not os.path.exists(video_path):
-        st.warning(f"⚠️ Machi, '{video_filename}' file kaanom!")
+        st.warning(f"⚠️ Machi, '{video_filename}' file kaanom! GitHub la upload panniya?")
         return
 
     bin_str = get_base64_of_bin_file(video_path)
     
+    # 🔥 FIXED: Removed the confusing comment inside the f-string
     video_html = f"""
     <style>
     .stApp {{
@@ -57,8 +58,7 @@ def set_background_video(video_filename):
     </video>
 
     <script>
-        // 🔥 FIX: MOUSE MOVE UNMUTE
-        // The '{once: true}' part ensures it only runs ONE time when you first move mouse.
+        // MOUSE MOVE UNMUTE LOGIC
         document.addEventListener('mousemove', function() {{
             var video = document.getElementById('myVideo');
             if (video.muted) {{
@@ -200,6 +200,7 @@ if st.session_state.celebrate:
 # ======================================================
 # 7. UI LAYOUT
 # ======================================================
+# Container to keep title centered properly
 with st.container():
     st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center;'><p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p></div>", unsafe_allow_html=True)
