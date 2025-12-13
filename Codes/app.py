@@ -23,17 +23,21 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-def set_background_video(video_file):
-    # Check if file exists
-    if not os.path.exists(video_file):
-        st.warning(f"⚠️ Machi, '{video_file}' file ah GitHub la upload panniya? Kaanom paaru!")
+def set_background_video(video_filename):
+    # 🔥 PATH FIX: Get the folder where app.py is located
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    video_path = os.path.join(current_dir, video_filename)
+    
+    # Check if file exists using the FULL PATH
+    if not os.path.exists(video_path):
+        st.warning(f"⚠️ Machi, '{video_filename}' file innum detect aagala. Path: {video_path}")
         return
 
-    bin_str = get_base64_of_bin_file(video_file)
+    bin_str = get_base64_of_bin_file(video_path)
     
     # HTML to inject video background
-    # Note: 'muted' is REMOVED so audio plays. 
-    # Browser might block autoplay if sound is on. User needs to interact with page once.
+    # NOTE: 'muted' is REMOVED so audio plays. 
+    # Browser might block autoplay with sound. Click anywhere on the page if video doesn't start.
     video_html = f"""
     <style>
     .stApp {{
@@ -59,7 +63,7 @@ def set_background_video(video_file):
     """
     st.markdown(video_html, unsafe_allow_html=True)
 
-# 🔥 CALL THE FUNCTION (Make sure 'background.mp4' is in your GitHub repo)
+# 🔥 CALL THE FUNCTION (Now looks in the correct folder)
 set_background_video('background.mp4')
 
 # ======================================================
@@ -343,6 +347,7 @@ if st.button("See Who Is Going To Win The Battle", use_container_width=True):
 
 # Display Winner Text (Persists after reload)
 if st.session_state.winner:
+    # 🔥 BOX FIX: Slim padding (10px) with Glassmorphism effect
     st.markdown(f"""
     <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(0,0,0,0.8); border-radius:10px; border:2px solid #4CAF50; backdrop-filter: blur(5px);">
         <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">THE BATTLE IS WON BY : {st.session_state.winner.upper()}</h2>
