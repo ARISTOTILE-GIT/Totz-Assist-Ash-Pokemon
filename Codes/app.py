@@ -6,7 +6,7 @@ import random
 import base64
 import streamlit.components.v1 as components
 
-# ======================================================
+# =====================================================
 # 1. PAGE CONFIGURATION
 # ======================================================
 st.set_page_config(
