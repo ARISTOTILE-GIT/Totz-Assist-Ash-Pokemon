@@ -102,8 +102,7 @@ h1 {
 .poke-type { color: #eee !important; font-size: 1.1rem; margin-bottom: 10px; }
 .power-badge { background: rgba(0,0,0,0.5); color: #FFCB05 !important; padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; margin-top: 10px; display: inline-block; border: 3px solid #FFCB05; }
 
-/* 🔥 FIX: CUSTOMIZE SELECTBOX (POKEMON SELECTOR) TO WHITE GLASS */
-/* The Container */
+/* FIX: CUSTOMIZE SELECTBOX (POKEMON SELECTOR) TO WHITE GLASS */
 div[data-baseweb="select"] > div {
     background-color: rgba(255, 255, 255, 0.2) !important;
     color: white !important;
@@ -111,29 +110,22 @@ div[data-baseweb="select"] > div {
     border-radius: 10px !important;
     backdrop-filter: blur(10px);
 }
-/* The Text inside */
-div[data-baseweb="select"] span {
-    color: white !important;
-    font-weight: 700 !important;
-}
-/* The Dropdown Icon */
-div[data-baseweb="select"] svg {
-    fill: white !important;
-}
-/* The Dropdown Menu List */
-div[data-baseweb="popover"] {
-    background-color: rgba(20, 20, 30, 0.95) !important; /* Dark BG for list */
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-div[data-baseweb="menu"] li {
-    color: white !important;
-}
+div[data-baseweb="select"] span { color: white !important; font-weight: 700 !important; }
+div[data-baseweb="select"] svg { fill: white !important; }
+div[data-baseweb="popover"] { background-color: rgba(20, 20, 30, 0.95) !important; border: 1px solid rgba(255, 255, 255, 0.3); }
+div[data-baseweb="menu"] li { color: white !important; }
 
 /* 🔥 FIX: PROGRESS BARS (HP/ATK/DEF) */
+/* The filled part (Blue) */
+.stProgress > div > div > div > div {
+    background-color: #3B4CCA !important; /* Pokemon Blue */
+}
+/* The background track part (White Glassy now) */
 .stProgress > div > div {
     background-color: rgba(255, 255, 255, 0.25) !important;
     border-radius: 10px;
 }
+/* The Labels (HP: 100) */
 .stProgress p {
     font-size: 1rem !important;
     font-weight: 800 !important;
