@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ======================================================
-# 🎥 BACKGROUND VIDEO WITH AUDIO (FIXED)
+# 🎥 BACKGROUND VIDEO (MOUSE MOVE UNMUTE)
 # ======================================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -28,12 +28,11 @@ def set_background_video(video_filename):
     video_path = os.path.join(current_dir, video_filename)
     
     if not os.path.exists(video_path):
-        st.warning(f"⚠️ Machi, '{video_filename}' file kaanom! GitHub la upload panniya?")
+        st.warning(f"⚠️ Machi, '{video_filename}' file kaanom!")
         return
 
     bin_str = get_base64_of_bin_file(video_path)
     
-    # 🔥 FIXED: CSS for Full Screen + JS for Audio Autoplay
     video_html = f"""
     <style>
     .stApp {{
@@ -48,124 +47,64 @@ def set_background_video(video_filename):
         object-fit: cover;
         z-index: -1;
     }}
-    /* Hide top header */
     header {{
         background-color: rgba(0,0,0,0) !important;
-        visibility: hidden;
-    }}
-    footer {{
-        visibility: hidden;
     }}
     </style>
     
-    <video autoplay loop id="myVideo">
+    <video autoplay loop muted playsinline id="myVideo">
         <source src="data:video/mp4;base64,{bin_str}" type="video/mp4">
     </video>
 
     <script>
-        document.addEventListener('click', function() {{
+        // 🔥 FIX: MOUSE MOVE UNMUTE
+        // The '{once: true}' part ensures it only runs ONE time when you first move mouse.
+        document.addEventListener('mousemove', function() {{
             var video = document.getElementById('myVideo');
-            video.muted = false;
-            video.play();
-        }});
+            if (video.muted) {{
+                video.muted = false;
+                video.play();
+            }}
+        }}, {{ once: true }});
     </script>
     """
     st.markdown(video_html, unsafe_allow_html=True)
 
-# 🔥 CALL THE FUNCTION
+# Call the function
 set_background_video('background.mp4')
 
 # ======================================================
-# 2. GLOBAL CSS (Dark Mode, Card UI, Glowing Pulse)
+# 2. GLOBAL CSS (Styles)
 # ======================================================
 st.markdown("""
 <style>
-/* Remove top padding */
-.block-container {
-    padding-top: 2rem !important;
-}
+.block-container { padding-top: 1rem !important; }
+h1 { margin-top: -20px !important; text-align: center; color: #FFCB05; text-shadow: 2px 2px #3B4CCA; }
+.subtitle { text-align: center; color: #cfcfcf; margin-bottom: 30px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; display: inline-block; }
 
-/* Header Adjustments */
-h1 {
-    margin-top: -20px !important;
-    text-align: center;
-    color: #FFCB05;
-    text-shadow: 2px 2px #3B4CCA;
-}
-.subtitle {
-    text-align: center;
-    color: #cfcfcf;
-    margin-bottom: 30px;
-    background: rgba(0,0,0,0.6);
-    padding: 10px;
-    border-radius: 10px;
-    display: inline-block;
-}
-
-/* POKEMON CARD STYLE - Glassmorphism */
+/* CARD STYLE */
 .poke-card {
-    background: rgba(14, 17, 23, 0.7); /* More transparent */
+    background: rgba(14, 17, 23, 0.6); 
     border-radius: 18px;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 20px;
     transition: all 0.3s ease;
     text-align: center;
-    backdrop-filter: blur(10px); /* Blurs the video behind */
+    backdrop-filter: blur(8px);
 }
+.poke-card:hover { transform: translateY(-5px); border-color: #8A2BE2; background: rgba(14, 17, 23, 0.8); }
 
-.poke-card:hover {
-    transform: translateY(-5px);
-    border-color: #8A2BE2;
-    background: rgba(14, 17, 23, 0.9);
-}
+/* WINNER GLOW */
+.winner-card { border: 3px solid #ffd700 !important; box-shadow: 0 0 30px rgba(255, 215, 0, 0.6) !important; animation: pulse 1.5s infinite alternate; }
+@keyframes pulse { from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.9); } }
 
-/* GLOWING WINNER EFFECT */
-.winner-card {
-    border: 3px solid #ffd700 !important;
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8) !important;
-    animation: pulse 1.5s infinite alternate;
-}
+.poke-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 10px; }
+.power-badge { background: rgba(0,0,0,0.5); color: #4da3ff; padding: 5px 10px; border-radius: 10px; font-weight: bold; margin-top: 10px; display: inline-block; }
 
-@keyframes pulse {
-    from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
-    to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.9); }
-}
-
-/* Titles inside cards */
-.poke-name {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #fff;
-    margin-top: 10px;
-}
-
-.power-badge {
-    background: rgba(0,0,0,0.5);
-    color: #4da3ff;
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-weight: bold;
-    margin-top: 10px;
-    display: inline-block;
-}
-
-/* FULL WIDTH BUTTON STYLE */
-div.stButton > button {
-    width: 100%;
-    background-color: #FF4B4B; 
-    color: white;
-    font-weight: bold;
-    font-size: 20px;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    transition: all 0.3s;
-}
-div.stButton > button:hover {
-    background-color: #D43F3F;
-    transform: scale(1.01);
-}
+/* BUTTON */
+div.stButton > button { width: 100%; background-color: #FF4B4B; color: white; font-weight: bold; font-size: 20px; padding: 12px; border-radius: 8px; border: none; transition: all 0.3s; }
+div.stButton > button:hover { background-color: #D43F3F; transform: scale(1.01); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -196,7 +135,7 @@ df = load_data()
 model = load_model()
 
 # ======================================================
-# 4. FULL TYPE CHART
+# 4. TYPE CHART
 # ======================================================
 type_chart = {
     'fire': {'grass': 2.0, 'water': 0.5, 'bug': 2.0, 'ice': 2.0, 'dragon': 0.5, 'steel': 2.0, 'rock': 0.5, 'ground': 0.5},
@@ -273,6 +212,7 @@ with col1:
     p1 = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu default
     d1 = df[df['name'] == p1].iloc[0]
 
+    # Apply Glowing Class if Winner
     card_class = "winner-card" if st.session_state.winner == p1 else ""
     
     st.markdown(f"""
@@ -298,6 +238,7 @@ with col3:
     p2 = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard default
     d2 = df[df['name'] == p2].iloc[0]
 
+    # Apply Glowing Class if Winner
     card_class = "winner-card" if st.session_state.winner == p2 else ""
     
     st.markdown(f"""
@@ -321,7 +262,7 @@ st.write("")
 
 if st.button("See Who Is Going To Win The Battle", use_container_width=True):
     if p1 == p2:
-        st.error("⚠️ Machi, rendume onnu! Vera ethavathu select pannu!")
+        st.error("⚠️ bro, onnaku arivu funda iruka rendum same pokemon da vera ethavathu choose pannu")
         st.stop()
     
     m1 = get_multiplier(d1['type1'], d2['type1'], d2['type2'])
