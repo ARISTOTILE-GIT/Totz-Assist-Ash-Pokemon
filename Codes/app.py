@@ -6,7 +6,7 @@ import random
 import base64
 import streamlit.components.v1 as components
 
-# =====================================================
+# ======================================================
 # 1. PAGE CONFIGURATION
 # ======================================================
 st.set_page_config(
@@ -16,7 +16,7 @@ st.set_page_config(
 )
 
 # ======================================================
-# 🎥 BACKGROUND VIDEO WITH AUDIO (LOCAL FILE)
+# 🎥 BACKGROUND VIDEO WITH AUDIO (FIXED)
 # ======================================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -24,20 +24,16 @@ def get_base64_of_bin_file(bin_file):
     return base64.b64encode(data).decode()
 
 def set_background_video(video_filename):
-    # 🔥 PATH FIX: Get the folder where app.py is located
     current_dir = os.path.dirname(os.path.abspath(__file__))
     video_path = os.path.join(current_dir, video_filename)
     
-    # Check if file exists using the FULL PATH
     if not os.path.exists(video_path):
-        st.warning(f"⚠️ Machi, '{video_filename}' file innum detect aagala. Path: {video_path}")
+        st.warning(f"⚠️ Machi, '{video_filename}' file kaanom! GitHub la upload panniya?")
         return
 
     bin_str = get_base64_of_bin_file(video_path)
     
-    # HTML to inject video background
-    # NOTE: 'muted' is REMOVED so audio plays. 
-    # Browser might block autoplay with sound. Click anywhere on the page if video doesn't start.
+    # 🔥 FIXED: CSS for Full Screen + JS for Audio Autoplay
     video_html = f"""
     <style>
     .stApp {{
@@ -45,25 +41,38 @@ def set_background_video(video_filename):
     }}
     #myVideo {{
         position: fixed;
-        right: 0;
-        bottom: 0;
-        min-width: 100%;
-        min-height: 100%;
-        z-index: -1;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
         object-fit: cover;
+        z-index: -1;
     }}
-    /* Hide the top header bar slightly to blend in */
+    /* Hide top header */
     header {{
         background-color: rgba(0,0,0,0) !important;
+        visibility: hidden;
+    }}
+    footer {{
+        visibility: hidden;
     }}
     </style>
+    
     <video autoplay loop id="myVideo">
         <source src="data:video/mp4;base64,{bin_str}" type="video/mp4">
     </video>
+
+    <script>
+        document.addEventListener('click', function() {{
+            var video = document.getElementById('myVideo');
+            video.muted = false;
+            video.play();
+        }});
+    </script>
     """
     st.markdown(video_html, unsafe_allow_html=True)
 
-# 🔥 CALL THE FUNCTION (Now looks in the correct folder)
+# 🔥 CALL THE FUNCTION
 set_background_video('background.mp4')
 
 # ======================================================
@@ -73,7 +82,7 @@ st.markdown("""
 <style>
 /* Remove top padding */
 .block-container {
-    padding-top: 2.5rem !important;
+    padding-top: 2rem !important;
 }
 
 /* Header Adjustments */
@@ -93,28 +102,28 @@ h1 {
     display: inline-block;
 }
 
-/* POKEMON CARD STYLE */
+/* POKEMON CARD STYLE - Glassmorphism */
 .poke-card {
-    background: rgba(14, 17, 23, 0.85); /* Transparent background */
+    background: rgba(14, 17, 23, 0.7); /* More transparent */
     border-radius: 18px;
     padding: 20px;
-    border: 1px solid #333;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     margin-bottom: 20px;
     transition: all 0.3s ease;
     text-align: center;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px); /* Blurs the video behind */
 }
 
 .poke-card:hover {
     transform: translateY(-5px);
     border-color: #8A2BE2;
-    background: rgba(14, 17, 23, 0.95);
+    background: rgba(14, 17, 23, 0.9);
 }
 
 /* GLOWING WINNER EFFECT */
 .winner-card {
     border: 3px solid #ffd700 !important;
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6) !important;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8) !important;
     animation: pulse 1.5s infinite alternate;
 }
 
@@ -132,7 +141,7 @@ h1 {
 }
 
 .power-badge {
-    background: #262730;
+    background: rgba(0,0,0,0.5);
     color: #4da3ff;
     padding: 5px 10px;
     border-radius: 10px;
@@ -141,9 +150,10 @@ h1 {
     display: inline-block;
 }
 
-/* FULL WIDTH BUTTON STYLE - RED COLOR */
+/* FULL WIDTH BUTTON STYLE */
 div.stButton > button {
-    background-color: #FF4B4B; /* Reddish Orange */
+    width: 100%;
+    background-color: #FF4B4B; 
     color: white;
     font-weight: bold;
     font-size: 20px;
@@ -151,7 +161,6 @@ div.stButton > button {
     border-radius: 8px;
     border: none;
     transition: all 0.3s;
-    width: 100%; 
 }
 div.stButton > button:hover {
     background-color: #D43F3F;
@@ -252,7 +261,6 @@ if st.session_state.celebrate:
 # ======================================================
 # 7. UI LAYOUT
 # ======================================================
-# Container to keep title centered properly
 with st.container():
     st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center;'><p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p></div>", unsafe_allow_html=True)
@@ -265,7 +273,6 @@ with col1:
     p1 = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu default
     d1 = df[df['name'] == p1].iloc[0]
 
-    # Apply Glowing Class if Winner
     card_class = "winner-card" if st.session_state.winner == p1 else ""
     
     st.markdown(f"""
@@ -291,7 +298,6 @@ with col3:
     p2 = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard default
     d2 = df[df['name'] == p2].iloc[0]
 
-    # Apply Glowing Class if Winner
     card_class = "winner-card" if st.session_state.winner == p2 else ""
     
     st.markdown(f"""
@@ -314,12 +320,10 @@ st.write("")
 st.write("")
 
 if st.button("See Who Is Going To Win The Battle", use_container_width=True):
-    # Mirror Match Check
     if p1 == p2:
-        st.error("⚠️ bro, onnaku arivu funda iruka rendum same pokemon da vera ethavathu choose pannu")
+        st.error("⚠️ Machi, rendume onnu! Vera ethavathu select pannu!")
         st.stop()
     
-    # Logic
     m1 = get_multiplier(d1['type1'], d2['type1'], d2['type2'])
     m2 = get_multiplier(d2['type1'], d1['type1'], d1['type2'])
     
@@ -338,16 +342,12 @@ if st.button("See Who Is Going To Win The Battle", use_container_width=True):
     
     winner = p1 if prediction == 0 else p2
     
-    # Update Session State
     st.session_state.winner = winner
     st.session_state.celebrate = True 
     
-    # Rerun to show Glow Effect Immediately
     st.rerun()
 
-# Display Winner Text (Persists after reload)
 if st.session_state.winner:
-    # 🔥 BOX FIX: Slim padding (10px) with Glassmorphism effect
     st.markdown(f"""
     <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(0,0,0,0.8); border-radius:10px; border:2px solid #4CAF50; backdrop-filter: blur(5px);">
         <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">THE BATTLE IS WON BY : {st.session_state.winner.upper()}</h2>
