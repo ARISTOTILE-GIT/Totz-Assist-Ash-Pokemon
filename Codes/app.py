@@ -3,6 +3,7 @@ import pandas as pd
 import joblib
 import os
 import random
+import base64
 import streamlit.components.v1 as components
 
 # ======================================================
@@ -15,48 +16,51 @@ st.set_page_config(
 )
 
 # ======================================================
-# 🎵 BACKGROUND MUSIC & VIDEO (THE MASS PART)
+# 🎥 BACKGROUND VIDEO WITH AUDIO (LOCAL FILE)
 # ======================================================
-def add_bg_video():
-    # BACKGROUND VIDEO (Stars/Space Theme)
-    # Note: Using a public URL. For best results, download a video, put in folder, and use base64.
-    video_url = "https://static.vecteezy.com/system/resources/previews/001/803/659/mp4/stars-in-space-background-free-video.mp4"
-    
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background: none;
-        }}
-        #myVideo {{
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100%;
-            min-height: 100%;
-            z-index: -1;
-            opacity: 0.7; /* Darkens the video slightly so text is readable */
-        }}
-        </style>
-        <video autoplay muted loop id="myVideo">
-            <source src="{video_url}" type="video/mp4">
-        </video>
-        """,
-        unsafe_allow_html=True
-    )
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
 
-def add_bg_music():
-    # Pokemon Battle Music (Hidden Player)
-    # Using a royalty-free battle track URL
-    audio_url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
-    
-    # Adding a small player in the sidebar so user can control it
-    st.sidebar.markdown("### 🎵 Battle Ambience")
-    st.sidebar.audio(audio_url, format="audio/mp3", start_time=0)
+def set_background_video(video_file):
+    # Check if file exists
+    if not os.path.exists(video_file):
+        st.warning(f"⚠️ Machi, '{video_file}' file ah GitHub la upload panniya? Kaanom paaru!")
+        return
 
-# Call the functions
-add_bg_video()
-add_bg_music()
+    bin_str = get_base64_of_bin_file(video_file)
+    
+    # HTML to inject video background
+    # Note: 'muted' is REMOVED so audio plays. 
+    # Browser might block autoplay if sound is on. User needs to interact with page once.
+    video_html = f"""
+    <style>
+    .stApp {{
+        background: none;
+    }}
+    #myVideo {{
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        z-index: -1;
+        object-fit: cover;
+    }}
+    /* Hide the top header bar slightly to blend in */
+    header {{
+        background-color: rgba(0,0,0,0) !important;
+    }}
+    </style>
+    <video autoplay loop id="myVideo">
+        <source src="data:video/mp4;base64,{bin_str}" type="video/mp4">
+    </video>
+    """
+    st.markdown(video_html, unsafe_allow_html=True)
+
+# 🔥 CALL THE FUNCTION (Make sure 'background.mp4' is in your GitHub repo)
+set_background_video('background.mp4')
 
 # ======================================================
 # 2. GLOBAL CSS (Dark Mode, Card UI, Glowing Pulse)
@@ -79,7 +83,7 @@ h1 {
     text-align: center;
     color: #cfcfcf;
     margin-bottom: 30px;
-    background: rgba(0,0,0,0.6); /* Semi-transparent bg for readability */
+    background: rgba(0,0,0,0.6);
     padding: 10px;
     border-radius: 10px;
     display: inline-block;
@@ -94,7 +98,7 @@ h1 {
     margin-bottom: 20px;
     transition: all 0.3s ease;
     text-align: center;
-    backdrop-filter: blur(5px); /* Blurs the video behind the card */
+    backdrop-filter: blur(5px);
 }
 
 .poke-card:hover {
@@ -244,7 +248,7 @@ if st.session_state.celebrate:
 # ======================================================
 # 7. UI LAYOUT
 # ======================================================
-# Centering the container content
+# Container to keep title centered properly
 with st.container():
     st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center;'><p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p></div>", unsafe_allow_html=True)
@@ -275,7 +279,6 @@ with col1:
 
 # --- VS TEXT ---
 with col2:
-    # Adjusted VS Text for better alignment
     st.markdown("<h1 style='text-align:center; margin-left:25px; padding-top:220px; font-size:50px; color:#FF5733; text-shadow: 2px 2px #000;'>VS</h1>", unsafe_allow_html=True)
 
 # --- PLAYER 2 UI ---
@@ -306,7 +309,6 @@ with col3:
 st.write("")
 st.write("")
 
-# 🔥 BUTTON FIX: use_container_width=True forces it to fill the screen width!
 if st.button("See Who Is Going To Win The Battle", use_container_width=True):
     # Mirror Match Check
     if p1 == p2:
@@ -334,14 +336,13 @@ if st.button("See Who Is Going To Win The Battle", use_container_width=True):
     
     # Update Session State
     st.session_state.winner = winner
-    st.session_state.celebrate = True # Trigger fireworks on reload
+    st.session_state.celebrate = True 
     
     # Rerun to show Glow Effect Immediately
     st.rerun()
 
 # Display Winner Text (Persists after reload)
 if st.session_state.winner:
-    # 🔥 BOX FIX: Slim padding (10px) with Glassmorphism effect
     st.markdown(f"""
     <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(0,0,0,0.8); border-radius:10px; border:2px solid #4CAF50; backdrop-filter: blur(5px);">
         <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">THE BATTLE IS WON BY : {st.session_state.winner.upper()}</h2>
