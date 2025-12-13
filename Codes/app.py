@@ -22,7 +22,151 @@ if "game_started" not in st.session_state:
     st.session_state.game_started = False
 
 # ======================================================
-# 3. BACKGROUND VIDEO FUNCTION
+# 3. GLOBAL CSS (THE NEW PREMIUM WHITE THEME + WIDGET FIXES)
+# ======================================================
+st.markdown("""
+<style>
+/* IMPORT GOOGLE FONT - POPPINS */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&display=swap');
+
+/* APPLY FONT & BOLD GLOBALLY */
+html, body, [class*="css"] {
+    font-family: 'Poppins', sans-serif !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+}
+
+/* 1px TEXT BORDER SHADOW MASK (For Readability) */
+h1, h2, h3, p, div, span, button, .poke-name, .subtitle, label {
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000 !important;
+}
+
+.block-container { padding-top: 1rem !important; }
+
+/* MAIN TITLES */
+h1 { 
+    margin-top: -20px !important; 
+    text-align: center; 
+    color: #FFCB05 !important;
+    font-weight: 800 !important;
+    text-shadow: -2px -2px 0 #3B4CCA, 2px -2px 0 #3B4CCA, -2px 2px 0 #3B4CCA, 2px 2px 0 #3B4CCA !important;
+}
+
+.subtitle { 
+    text-align: center; 
+    color: #fff !important; 
+    margin-bottom: 30px; 
+    background: rgba(255,255,255,0.2); 
+    padding: 15px; 
+    border-radius: 15px; 
+    display: inline-block; 
+    backdrop-filter: blur(10px); 
+    border: 2px solid rgba(255,255,255,0.4); 
+    font-size: 1.2rem !important;
+}
+
+/* 🔥 WHITE GLASS CARD STYLE */
+.poke-card {
+    background: rgba(255, 255, 255, 0.15); 
+    border-radius: 25px;
+    padding: 25px;
+    border: 3px solid rgba(255, 255, 255, 0.5); 
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    text-align: center;
+    backdrop-filter: blur(20px); 
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+.poke-card:hover { 
+    transform: translateY(-8px) scale(1.02); 
+    border-color: #ffffff; 
+    background: rgba(255, 255, 255, 0.35); 
+    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.4);
+}
+
+/* WINNER GLOW */
+.winner-card { 
+    border: 4px solid #ffd700 !important; 
+    box-shadow: 0 0 60px rgba(255, 215, 0, 0.9) !important; 
+    animation: pulse 1.5s infinite alternate; 
+    background: rgba(255, 215, 0, 0.2) !important;
+}
+@keyframes pulse { from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); } to { box-shadow: 0 0 70px rgba(255, 215, 0, 1.0); } }
+
+/* TEXT STYLES */
+.poke-name { font-size: 1.8rem !important; font-weight: 800 !important; color: #fff !important; margin-top: 15px; }
+.poke-type { color: #eee !important; font-size: 1.1rem; margin-bottom: 10px; }
+.power-badge { background: rgba(0,0,0,0.5); color: #FFCB05 !important; padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.2rem; margin-top: 10px; display: inline-block; border: 3px solid #FFCB05; }
+
+/* 🔥 FIX: CUSTOMIZE SELECTBOX (POKEMON SELECTOR) TO WHITE GLASS */
+/* The Container */
+div[data-baseweb="select"] > div {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    border-radius: 10px !important;
+    backdrop-filter: blur(10px);
+}
+/* The Text inside */
+div[data-baseweb="select"] span {
+    color: white !important;
+    font-weight: 700 !important;
+}
+/* The Dropdown Icon */
+div[data-baseweb="select"] svg {
+    fill: white !important;
+}
+/* The Dropdown Menu List */
+div[data-baseweb="popover"] {
+    background-color: rgba(20, 20, 30, 0.95) !important; /* Dark BG for list */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+div[data-baseweb="menu"] li {
+    color: white !important;
+}
+
+/* 🔥 FIX: PROGRESS BARS (HP/ATK/DEF) */
+.stProgress > div > div > div > div {
+    background-color: #3B4CCA !important; /* Pokemon Blue */
+}
+.stProgress p {
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+    color: white !important;
+    margin-bottom: 5px !important;
+}
+
+/* PURPLE BUTTON */
+div.stButton > button { 
+    width: 100%; 
+    background-color: #8A2BE2; 
+    color: white !important; 
+    font-weight: 800 !important; 
+    font-size: 22px !important; 
+    padding: 15px; 
+    border-radius: 12px; 
+    border: 3px solid #6A0DAD; 
+    transition: all 0.3s; 
+    box-shadow: 0 6px 20px rgba(138, 43, 226, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+div.stButton > button:hover { 
+    background-color: #9932CC; 
+    transform: scale(1.03); 
+    box-shadow: 0 10px 30px rgba(138, 43, 226, 0.8); 
+    border-color: #fff;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ======================================================
+# 4. BACKGROUND VIDEO FUNCTION
 # ======================================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -72,35 +216,31 @@ def set_background_video(video_filename):
     st.markdown(video_html, unsafe_allow_html=True)
 
 # ======================================================
-# 4. SPLASH SCREEN (CLICK TO START)
+# 5. SPLASH SCREEN (CLICK TO START)
 # ======================================================
 if not st.session_state.game_started:
     st.markdown("""
     <style>
         .stApp { background-color: #000; }
-        .start-container { text-align: center; margin-top: 20vh; }
+        .start-container { text-align: center; margin-top: 25vh; }
         .big-title {
-            font-size: 80px;
-            font-weight: bold;
-            background: -webkit-linear-gradient(#FFCB05, #c7a008);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0px 0px 30px rgba(255, 203, 5, 0.5);
+            font-size: 90px !important;
+            font-weight: 900 !important;
+            color: #FFCB05 !important;
+            text-shadow: -3px -3px 0 #3B4CCA, 3px -3px 0 #3B4CCA, -3px 3px 0 #3B4CCA, 3px 3px 0 #3B4CCA !important;
         }
-        div.stButton > button {
-            font-size: 30px;
-            padding: 20px 50px;
-            background-color: #8A2BE2; /* Start Button Purple */
-            color: white;
-            border-radius: 50px;
-            border: 2px solid #fff;
-            box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
-            transition: transform 0.2s;
+        .start-btn-container div.stButton > button {
+            font-size: 35px !important;
+            padding: 25px 60px !important;
+            background-color: #8A2BE2 !important;
+            border-radius: 60px !important;
+            border: 4px solid #fff !important;
+            box-shadow: 0 0 40px rgba(138, 43, 226, 1.0) !important;
         }
-        div.stButton > button:hover {
-            transform: scale(1.1);
-            background-color: #6a1b9a;
-        }
+         .start-btn-container div.stButton > button:hover {
+             transform: scale(1.1) !important;
+             background-color: #9932CC !important;
+         }
     </style>
     """, unsafe_allow_html=True)
 
@@ -110,9 +250,12 @@ if not st.session_state.game_started:
         st.write("")
         st.write("")
         
-        if st.button("🔊 CLICK TO ENTER ARENA 🔊", use_container_width=True):
-            st.session_state.game_started = True
-            st.rerun()
+        with st.container():
+             st.markdown('<div class="start-btn-container">', unsafe_allow_html=True)
+             if st.button("🔊 CLICK TO ENTER ARENA 🔊", use_container_width=True):
+                 st.session_state.game_started = True
+                 st.rerun()
+             st.markdown('</div>', unsafe_allow_html=True)
             
     st.stop()
 
@@ -144,66 +287,6 @@ def load_model():
 
 df = load_data()
 model = load_model()
-
-# 3. GLOBAL CSS (Main App Styles)
-st.markdown("""
-<style>
-.block-container { padding-top: 1rem !important; }
-h1 { margin-top: -20px !important; text-align: center; color: #FFCB05; text-shadow: 2px 2px #3B4CCA; }
-.subtitle { text-align: center; color: #fff; margin-bottom: 30px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; display: inline-block; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
-
-/* 🔥 NEW WHITE GLASS CARD STYLE (Icy Look) */
-.poke-card {
-    background: rgba(255, 255, 255, 0.12); /* White Tint */
-    border-radius: 20px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.25); /* Subtle White Border */
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    text-align: center;
-    backdrop-filter: blur(15px); /* Strong Frost Effect */
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-}
-.poke-card:hover { 
-    transform: translateY(-5px); 
-    border-color: #fff; 
-    background: rgba(255, 255, 255, 0.2); 
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
-}
-
-/* WINNER GLOW */
-.winner-card { 
-    border: 3px solid #ffd700 !important; 
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.8) !important; 
-    animation: pulse 1.5s infinite alternate; 
-    background: rgba(255, 215, 0, 0.15) !important; /* Gold Tint */
-}
-@keyframes pulse { from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); } to { box-shadow: 0 0 60px rgba(255, 215, 0, 1.0); } }
-
-.poke-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 10px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
-.power-badge { background: rgba(0,0,0,0.7); color: #FFCB05; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; border: 1px solid #FFCB05; }
-
-/* 🔥 NEW PURPLE BUTTON STYLE */
-div.stButton > button { 
-    width: 100%; 
-    background-color: #8A2BE2; /* Deep Purple */
-    color: white; 
-    font-weight: bold; 
-    font-size: 20px; 
-    padding: 12px; 
-    border-radius: 8px; 
-    border: 2px solid #6A0DAD; 
-    transition: all 0.3s; 
-    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4); 
-}
-div.stButton > button:hover { 
-    background-color: #9932CC; 
-    transform: scale(1.02); 
-    box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6); 
-    border-color: #fff;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # 4. MULTIPLIER LOGIC
 type_chart = {
@@ -259,21 +342,21 @@ if st.session_state.celebrate:
 # 7. UI LAYOUT
 # ======================================================
 with st.container():
-    st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
+    st.markdown("<h1>⚡ POKÉMON BATTLE PREDICTOR ⚡</h1>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center;'><p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p></div>", unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns([1, 0.2, 1])
 
 with col1:
-    st.markdown("<h2 style='text-align:center; color: white;'>Player 1</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center; color: white;'>PLAYER 1</h2>", unsafe_allow_html=True)
     p1 = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24)
     d1 = df[df['name'] == p1].iloc[0]
     card_class = "winner-card" if st.session_state.winner == p1 else ""
     st.markdown(f"""
     <div class="poke-card {card_class}">
-        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d1['id']}.png" width="150">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d1['id']}.png" width="160">
         <div class="poke-name">{p1.upper()}</div>
-        <div style="color:#eee; font-weight:500;">{d1['type1']} / {d1['type2']}</div>
+        <div class="poke-type">{d1['type1']} / {d1['type2']}</div>
         <div class="power-badge">⚡ POWER: {d1['total_power']}</div>
     </div>
     """, unsafe_allow_html=True)
@@ -282,18 +365,19 @@ with col1:
     st.progress(int(d1['defense']/230*100), f"DEF: {d1['defense']}")
 
 with col2:
-    st.markdown("<h1 style='text-align:center; margin-left:25px; padding-top:220px; font-size:50px; color:#FF5733; text-shadow: 2px 2px #000;'>VS</h1>", unsafe_allow_html=True)
+    # Adjusted VS text size and padding for bold font
+    st.markdown("<h1 style='text-align:center; margin-left:20px; padding-top:240px; font-size:60px; color:#FF5733 !important;'>VS</h1>", unsafe_allow_html=True)
 
 with col3:
-    st.markdown("<h2 style='text-align:center; color: white;'>Player 2</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center; color: white;'>PLAYER 2</h2>", unsafe_allow_html=True)
     p2 = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5)
     d2 = df[df['name'] == p2].iloc[0]
     card_class = "winner-card" if st.session_state.winner == p2 else ""
     st.markdown(f"""
     <div class="poke-card {card_class}">
-        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d2['id']}.png" width="150">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d2['id']}.png" width="160">
         <div class="poke-name">{p2.upper()}</div>
-        <div style="color:#eee; font-weight:500;">{d2['type1']} / {d2['type2']}</div>
+        <div class="poke-type">{d2['type1']} / {d2['type2']}</div>
         <div class="power-badge">⚡ POWER: {d2['total_power']}</div>
     </div>
     """, unsafe_allow_html=True)
@@ -306,8 +390,9 @@ with col3:
 # ======================================================
 st.write("")
 st.write("")
+st.write("") # Extra spacing before button
 
-if st.button("See Who Is Going To Win The Battle", use_container_width=True):
+if st.button("⚔️ SEE WHO IS GOING TO WIN THE BATTLE ⚔️", use_container_width=True):
     if p1 == p2:
         st.error("⚠️ bro, onnaku arivu funda iruka rendum same pokemon da vera ethavathu choose pannu")
         st.stop()
@@ -329,9 +414,10 @@ if st.button("See Who Is Going To Win The Battle", use_container_width=True):
     st.rerun()
 
 if st.session_state.winner:
+    # Updated Winner box to match white glass theme with green tint
     st.markdown(f"""
-    <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(255,255,255,0.2); border-radius:10px; border:2px solid #4CAF50; backdrop-filter: blur(10px);">
-        <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem; text-shadow: 1px 1px 0 #000;">THE BATTLE IS WON BY : {st.session_state.winner.upper()}</h2>
+    <div style="text-align:center; margin-top:20px; margin-bottom:10px; padding:15px; background:rgba(76, 175, 80, 0.3); border-radius:20px; border:3px solid #4CAF50; backdrop-filter: blur(15px); box-shadow: 0 0 30px rgba(76, 175, 80, 0.5);">
+        <h2 style="color:#fff; margin:0; font-size: 2rem; text-shadow: 2px 2px 0 #000;">🏆 THE BATTLE IS WON BY : {st.session_state.winner.upper()} 🏆</h2>
     </div>
-    <h3 style="text-align:center; color:white; margin-top:5px; text-shadow: 1px 1px #000;">AI Confidence: {99.0}%</h3>
+    <h3 style="text-align:center; color:white; margin-top:10px; font-size: 1.5rem;">AI Confidence: {99.0}%</h3>
     """, unsafe_allow_html=True)
