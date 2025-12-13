@@ -10,7 +10,7 @@ import streamlit.components.v1 as components
 # 1. PAGE CONFIGURATION
 # ======================================================
 st.set_page_config(
-    page_title="AI Pokémon Battle Arena",
+    page_title="Enna Look uh",
     page_icon="⚔️",
     layout="wide"
 )
@@ -39,7 +39,6 @@ def set_background_video(video_filename):
 
     bin_str = get_base64_of_bin_file(video_path)
     
-    # 🔥 VIDEO HTML (No 'muted', Sound ON)
     video_html = f"""
     <style>
     .stApp {{
@@ -64,7 +63,6 @@ def set_background_video(video_filename):
     </video>
     
     <script>
-        // Force Unmute immediately
         var video = document.getElementById("myVideo");
         video.muted = false;
         video.volume = 1.0;
@@ -74,17 +72,13 @@ def set_background_video(video_filename):
     st.markdown(video_html, unsafe_allow_html=True)
 
 # ======================================================
-# 4. SPLASH SCREEN (CLICK TO START) - THIS FIXES AUDIO
+# 4. SPLASH SCREEN (CLICK TO START)
 # ======================================================
 if not st.session_state.game_started:
-    # --- START SCREEN UI ---
     st.markdown("""
     <style>
         .stApp { background-color: #000; }
-        .start-container {
-            text-align: center;
-            margin-top: 20vh;
-        }
+        .start-container { text-align: center; margin-top: 20vh; }
         .big-title {
             font-size: 80px;
             font-weight: bold;
@@ -93,20 +87,19 @@ if not st.session_state.game_started:
             -webkit-text-fill-color: transparent;
             text-shadow: 0px 0px 30px rgba(255, 203, 5, 0.5);
         }
-        /* Custom Start Button */
         div.stButton > button {
             font-size: 30px;
             padding: 20px 50px;
-            background-color: #FF4B4B;
+            background-color: #8A2BE2; /* Start Button Purple */
             color: white;
             border-radius: 50px;
-            border: none;
-            box-shadow: 0 0 20px rgba(255, 75, 75, 0.8);
+            border: 2px solid #fff;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
             transition: transform 0.2s;
         }
         div.stButton > button:hover {
             transform: scale(1.1);
-            background-color: #ff1f1f;
+            background-color: #6a1b9a;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -117,19 +110,17 @@ if not st.session_state.game_started:
         st.write("")
         st.write("")
         
-        # THIS BUTTON IS THE KEY: Clicking it allows Audio to play!
         if st.button("🔊 CLICK TO ENTER ARENA 🔊", use_container_width=True):
             st.session_state.game_started = True
             st.rerun()
             
-    # Stop execution here until button is clicked
     st.stop()
 
 # ======================================================
 # 🚀 MAIN APP (Runs ONLY after 'Start' is clicked)
 # ======================================================
 
-# 1. LOAD VIDEO (Now audio will play because user clicked start!)
+# 1. LOAD VIDEO
 set_background_video('background.mp4')
 
 # 2. LOAD DATA & MODEL
@@ -159,32 +150,58 @@ st.markdown("""
 <style>
 .block-container { padding-top: 1rem !important; }
 h1 { margin-top: -20px !important; text-align: center; color: #FFCB05; text-shadow: 2px 2px #3B4CCA; }
-.subtitle { text-align: center; color: #cfcfcf; margin-bottom: 30px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; display: inline-block; }
+.subtitle { text-align: center; color: #fff; margin-bottom: 30px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; display: inline-block; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); }
 
-/* WHITE GLASS CARD STYLE */
+/* 🔥 NEW WHITE GLASS CARD STYLE (Icy Look) */
 .poke-card {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12); /* White Tint */
     border-radius: 20px;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.25); /* Subtle White Border */
     margin-bottom: 20px;
     transition: all 0.3s ease;
     text-align: center;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(15px); /* Strong Frost Effect */
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
 }
-.poke-card:hover { transform: translateY(-5px); border-color: #fff; background: rgba(255, 255, 255, 0.25); }
+.poke-card:hover { 
+    transform: translateY(-5px); 
+    border-color: #fff; 
+    background: rgba(255, 255, 255, 0.2); 
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+}
 
 /* WINNER GLOW */
-.winner-card { border: 3px solid #ffd700 !important; box-shadow: 0 0 40px rgba(255, 215, 0, 0.8) !important; animation: pulse 1.5s infinite alternate; background: rgba(255, 215, 0, 0.1) !important; }
-@keyframes pulse { from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } to { box-shadow: 0 0 50px rgba(255, 215, 0, 1.0); } }
+.winner-card { 
+    border: 3px solid #ffd700 !important; 
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.8) !important; 
+    animation: pulse 1.5s infinite alternate; 
+    background: rgba(255, 215, 0, 0.15) !important; /* Gold Tint */
+}
+@keyframes pulse { from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); } to { box-shadow: 0 0 60px rgba(255, 215, 0, 1.0); } }
 
-.poke-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-.power-badge { background: rgba(0,0,0,0.6); color: #FFCB05; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; border: 1px solid #FFCB05; }
+.poke-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 10px; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+.power-badge { background: rgba(0,0,0,0.7); color: #FFCB05; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; border: 1px solid #FFCB05; }
 
-/* BUTTON */
-div.stButton > button { width: 100%; background-color: #FF4B4B; color: white; font-weight: bold; font-size: 20px; padding: 12px; border-radius: 8px; border: none; transition: all 0.3s; }
-div.stButton > button:hover { background-color: #D43F3F; transform: scale(1.01); }
+/* 🔥 NEW PURPLE BUTTON STYLE */
+div.stButton > button { 
+    width: 100%; 
+    background-color: #8A2BE2; /* Deep Purple */
+    color: white; 
+    font-weight: bold; 
+    font-size: 20px; 
+    padding: 12px; 
+    border-radius: 8px; 
+    border: 2px solid #6A0DAD; 
+    transition: all 0.3s; 
+    box-shadow: 0 4px 15px rgba(138, 43, 226, 0.4); 
+}
+div.stButton > button:hover { 
+    background-color: #9932CC; 
+    transform: scale(1.02); 
+    box-shadow: 0 6px 20px rgba(138, 43, 226, 0.6); 
+    border-color: #fff;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -216,7 +233,7 @@ def get_multiplier(atk, d1, d2):
     return m1 * m2
 
 # ======================================================
-# 5. FIREWORKS
+# 5. FIREWORKS FUNCTION
 # ======================================================
 def run_fullscreen_fireworks():
     fireworks_html = """
@@ -239,7 +256,7 @@ if st.session_state.celebrate:
     st.session_state.celebrate = False
 
 # ======================================================
-# 7. MAIN UI LAYOUT
+# 7. UI LAYOUT
 # ======================================================
 with st.container():
     st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
@@ -314,7 +331,7 @@ if st.button("See Who Is Going To Win The Battle", use_container_width=True):
 if st.session_state.winner:
     st.markdown(f"""
     <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(255,255,255,0.2); border-radius:10px; border:2px solid #4CAF50; backdrop-filter: blur(10px);">
-        <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">THE BATTLE IS WON BY : {st.session_state.winner.upper()}</h2>
+        <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem; text-shadow: 1px 1px 0 #000;">THE BATTLE IS WON BY : {st.session_state.winner.upper()}</h2>
     </div>
     <h3 style="text-align:center; color:white; margin-top:5px; text-shadow: 1px 1px #000;">AI Confidence: {99.0}%</h3>
     """, unsafe_allow_html=True)
