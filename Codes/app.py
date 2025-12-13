@@ -130,8 +130,9 @@ div[data-baseweb="menu"] li {
 }
 
 /* 🔥 FIX: PROGRESS BARS (HP/ATK/DEF) */
-.stProgress > div > div > div > div {
-    background-color: #3B4CCA !important; /* Pokemon Blue */
+.stProgress > div > div {
+    background-color: rgba(255, 255, 255, 0.25) !important;
+    border-radius: 10px;
 }
 .stProgress p {
     font-size: 1rem !important;
