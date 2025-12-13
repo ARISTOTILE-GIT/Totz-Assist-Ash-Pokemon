@@ -15,6 +15,50 @@ st.set_page_config(
 )
 
 # ======================================================
+# 🎵 BACKGROUND MUSIC & VIDEO (THE MASS PART)
+# ======================================================
+def add_bg_video():
+    # BACKGROUND VIDEO (Stars/Space Theme)
+    # Note: Using a public URL. For best results, download a video, put in folder, and use base64.
+    video_url = "https://static.vecteezy.com/system/resources/previews/001/803/659/mp4/stars-in-space-background-free-video.mp4"
+    
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background: none;
+        }}
+        #myVideo {{
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            z-index: -1;
+            opacity: 0.7; /* Darkens the video slightly so text is readable */
+        }}
+        </style>
+        <video autoplay muted loop id="myVideo">
+            <source src="{video_url}" type="video/mp4">
+        </video>
+        """,
+        unsafe_allow_html=True
+    )
+
+def add_bg_music():
+    # Pokemon Battle Music (Hidden Player)
+    # Using a royalty-free battle track URL
+    audio_url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
+    
+    # Adding a small player in the sidebar so user can control it
+    st.sidebar.markdown("### 🎵 Battle Ambience")
+    st.sidebar.audio(audio_url, format="audio/mp3", start_time=0)
+
+# Call the functions
+add_bg_video()
+add_bg_music()
+
+# ======================================================
 # 2. GLOBAL CSS (Dark Mode, Card UI, Glowing Pulse)
 # ======================================================
 st.markdown("""
@@ -35,22 +79,28 @@ h1 {
     text-align: center;
     color: #cfcfcf;
     margin-bottom: 30px;
+    background: rgba(0,0,0,0.6); /* Semi-transparent bg for readability */
+    padding: 10px;
+    border-radius: 10px;
+    display: inline-block;
 }
 
 /* POKEMON CARD STYLE */
 .poke-card {
-    background: linear-gradient(145deg, #0e1117, #161b22);
+    background: rgba(14, 17, 23, 0.85); /* Transparent background */
     border-radius: 18px;
     padding: 20px;
     border: 1px solid #333;
     margin-bottom: 20px;
     transition: all 0.3s ease;
     text-align: center;
+    backdrop-filter: blur(5px); /* Blurs the video behind the card */
 }
 
 .poke-card:hover {
     transform: translateY(-5px);
     border-color: #8A2BE2;
+    background: rgba(14, 17, 23, 0.95);
 }
 
 /* GLOWING WINNER EFFECT */
@@ -194,14 +244,16 @@ if st.session_state.celebrate:
 # ======================================================
 # 7. UI LAYOUT
 # ======================================================
-st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
-st.markdown("<p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p>", unsafe_allow_html=True)
+# Centering the container content
+with st.container():
+    st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center;'><p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p></div>", unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns([1, 0.2, 1])
 
 # --- PLAYER 1 UI ---
 with col1:
-    st.markdown("<h2 style='text-align:center;'>Player 1</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center; color: white;'>Player 1</h2>", unsafe_allow_html=True)
     p1 = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu default
     d1 = df[df['name'] == p1].iloc[0]
 
@@ -223,12 +275,12 @@ with col1:
 
 # --- VS TEXT ---
 with col2:
-    # 🔥 FIX: Increased padding-top to 220px to push it down further
-    st.markdown("<h1 style='text-align:center; margin-left:25px; padding-top:220px; font-size:50px; color:#FF5733;'>VS</h1>", unsafe_allow_html=True)
+    # Adjusted VS Text for better alignment
+    st.markdown("<h1 style='text-align:center; margin-left:25px; padding-top:220px; font-size:50px; color:#FF5733; text-shadow: 2px 2px #000;'>VS</h1>", unsafe_allow_html=True)
 
 # --- PLAYER 2 UI ---
 with col3:
-    st.markdown("<h2 style='text-align:center;'>Player 2</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center; color: white;'>Player 2</h2>", unsafe_allow_html=True)
     p2 = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard default
     d2 = df[df['name'] == p2].iloc[0]
 
@@ -289,10 +341,10 @@ if st.button("See Who Is Going To Win The Battle", use_container_width=True):
 
 # Display Winner Text (Persists after reload)
 if st.session_state.winner:
-    # 🔥 BOX FIX: Slim padding (10px)
+    # 🔥 BOX FIX: Slim padding (10px) with Glassmorphism effect
     st.markdown(f"""
-    <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(0,0,0,0.5); border-radius:10px; border:2px solid #4CAF50;">
+    <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(0,0,0,0.8); border-radius:10px; border:2px solid #4CAF50; backdrop-filter: blur(5px);">
         <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">THE BATTLE IS WON BY : {st.session_state.winner.upper()}</h2>
     </div>
-    <h3 style="text-align:center; color:white; margin-top:5px;">AI Confidence: {99.0}%</h3>
+    <h3 style="text-align:center; color:white; margin-top:5px; text-shadow: 1px 1px #000;">AI Confidence: {99.0}%</h3>
     """, unsafe_allow_html=True)
