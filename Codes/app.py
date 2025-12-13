@@ -16,7 +16,13 @@ st.set_page_config(
 )
 
 # ======================================================
-# 🎥 BACKGROUND VIDEO (FORCE AUDIO FIX)
+# 2. SESSION STATE (For Start Screen)
+# ======================================================
+if "game_started" not in st.session_state:
+    st.session_state.game_started = False
+
+# ======================================================
+# 3. BACKGROUND VIDEO FUNCTION
 # ======================================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -33,6 +39,7 @@ def set_background_video(video_filename):
 
     bin_str = get_base64_of_bin_file(video_path)
     
+    # 🔥 VIDEO HTML (No 'muted', Sound ON)
     video_html = f"""
     <style>
     .stApp {{
@@ -52,94 +59,85 @@ def set_background_video(video_filename):
     }}
     </style>
     
-    <video autoplay loop muted playsinline id="myVideo">
+    <video autoplay loop id="myVideo">
         <source src="data:video/mp4;base64,{bin_str}" type="video/mp4">
     </video>
-
+    
     <script>
-        // 🔥 AUDIO FIX: Browser only allows sound after USER INTERACTION (Click/Keypress)
-        // This script waits for ANY click on the page to Turn On Audio.
-        
-        function enableAudio() {{
-            var video = document.getElementById('myVideo');
-            if (video.muted) {{
-                video.muted = false;
-                video.volume = 1.0; // Force Max Volume
-                video.play();
-                console.log("Audio Enabled!");
-            }}
-        }}
-
-        // Listen for Click or Keypress to unmute
-        document.addEventListener('click', enableAudio);
-        document.addEventListener('keydown', enableAudio);
-        
-        // Try mousemove once (might work in some browsers)
-        document.addEventListener('mousemove', enableAudio, {{ once: true }});
+        // Force Unmute immediately
+        var video = document.getElementById("myVideo");
+        video.muted = false;
+        video.volume = 1.0;
+        video.play();
     </script>
     """
     st.markdown(video_html, unsafe_allow_html=True)
 
-# Call the function
+# ======================================================
+# 4. SPLASH SCREEN (CLICK TO START) - THIS FIXES AUDIO
+# ======================================================
+if not st.session_state.game_started:
+    # --- START SCREEN UI ---
+    st.markdown("""
+    <style>
+        .stApp { background-color: #000; }
+        .start-container {
+            text-align: center;
+            margin-top: 20vh;
+        }
+        .big-title {
+            font-size: 80px;
+            font-weight: bold;
+            background: -webkit-linear-gradient(#FFCB05, #c7a008);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 0px 30px rgba(255, 203, 5, 0.5);
+        }
+        /* Custom Start Button */
+        div.stButton > button {
+            font-size: 30px;
+            padding: 20px 50px;
+            background-color: #FF4B4B;
+            color: white;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 0 20px rgba(255, 75, 75, 0.8);
+            transition: transform 0.2s;
+        }
+        div.stButton > button:hover {
+            transform: scale(1.1);
+            background-color: #ff1f1f;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("<div class='start-container'><h1 class='big-title'>POKÉMON<br>BATTLE ARENA</h1></div>", unsafe_allow_html=True)
+        st.write("")
+        st.write("")
+        
+        # THIS BUTTON IS THE KEY: Clicking it allows Audio to play!
+        if st.button("🔊 CLICK TO ENTER ARENA 🔊", use_container_width=True):
+            st.session_state.game_started = True
+            st.rerun()
+            
+    # Stop execution here until button is clicked
+    st.stop()
+
+# ======================================================
+# 🚀 MAIN APP (Runs ONLY after 'Start' is clicked)
+# ======================================================
+
+# 1. LOAD VIDEO (Now audio will play because user clicked start!)
 set_background_video('background.mp4')
 
-# ======================================================
-# 2. GLOBAL CSS (White Glass UI Update)
-# ======================================================
-st.markdown("""
-<style>
-.block-container { padding-top: 1rem !important; }
-h1 { margin-top: -20px !important; text-align: center; color: #FFCB05; text-shadow: 2px 2px #3B4CCA; }
-.subtitle { text-align: center; color: #eee; margin-bottom: 30px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; display: inline-block; backdrop-filter: blur(5px); }
-
-/* 🔥 NEW WHITE GLASS CARD STYLE */
-.poke-card {
-    background: rgba(255, 255, 255, 0.15); /* White Transparent */
-    border-radius: 20px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.3); /* White Border */
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-    text-align: center;
-    backdrop-filter: blur(12px); /* Frosted Glass Effect */
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-}
-
-.poke-card:hover { 
-    transform: translateY(-5px); 
-    border-color: #fff; 
-    background: rgba(255, 255, 255, 0.25); 
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-}
-
-/* WINNER GLOW */
-.winner-card { 
-    border: 3px solid #ffd700 !important; 
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8) !important; 
-    animation: pulse 1.5s infinite alternate; 
-    background: rgba(255, 215, 0, 0.1) !important; /* Gold Tint */
-}
-@keyframes pulse { from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } to { box-shadow: 0 0 50px rgba(255, 215, 0, 1.0); } }
-
-/* TEXT COLORS */
-.poke-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-.power-badge { background: rgba(0,0,0,0.6); color: #FFCB05; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; border: 1px solid #FFCB05;}
-
-/* BUTTON */
-div.stButton > button { width: 100%; background-color: #FF4B4B; color: white; font-weight: bold; font-size: 20px; padding: 12px; border-radius: 8px; border: none; transition: all 0.3s; box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4); }
-div.stButton > button:hover { background-color: #ff3333; transform: scale(1.02); box-shadow: 0 6px 20px rgba(255, 75, 75, 0.6); }
-</style>
-""", unsafe_allow_html=True)
-
-# ======================================================
-# 3. LOAD DATA & MODEL
-# ======================================================
+# 2. LOAD DATA & MODEL
 @st.cache_data
 def load_data():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(current_dir, 'pokemon_data.csv')
     if not os.path.exists(csv_path):
-        st.error("❌ pokemon_data.csv not found!")
         return pd.DataFrame()
     df = pd.read_csv(csv_path)
     df['type2'] = df['type2'].fillna("None")
@@ -150,16 +148,47 @@ def load_model():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(current_dir, 'pokemon_battle_model_ultra.pkl')
     if not os.path.exists(model_path):
-        st.error("❌ Model file not found!")
         return None
     return joblib.load(model_path)
 
 df = load_data()
 model = load_model()
 
-# ======================================================
-# 4. TYPE CHART
-# ======================================================
+# 3. GLOBAL CSS (Main App Styles)
+st.markdown("""
+<style>
+.block-container { padding-top: 1rem !important; }
+h1 { margin-top: -20px !important; text-align: center; color: #FFCB05; text-shadow: 2px 2px #3B4CCA; }
+.subtitle { text-align: center; color: #cfcfcf; margin-bottom: 30px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; display: inline-block; }
+
+/* WHITE GLASS CARD STYLE */
+.poke-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+.poke-card:hover { transform: translateY(-5px); border-color: #fff; background: rgba(255, 255, 255, 0.25); }
+
+/* WINNER GLOW */
+.winner-card { border: 3px solid #ffd700 !important; box-shadow: 0 0 40px rgba(255, 215, 0, 0.8) !important; animation: pulse 1.5s infinite alternate; background: rgba(255, 215, 0, 0.1) !important; }
+@keyframes pulse { from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } to { box-shadow: 0 0 50px rgba(255, 215, 0, 1.0); } }
+
+.poke-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.power-badge { background: rgba(0,0,0,0.6); color: #FFCB05; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; border: 1px solid #FFCB05; }
+
+/* BUTTON */
+div.stButton > button { width: 100%; background-color: #FF4B4B; color: white; font-weight: bold; font-size: 20px; padding: 12px; border-radius: 8px; border: none; transition: all 0.3s; }
+div.stButton > button:hover { background-color: #D43F3F; transform: scale(1.01); }
+</style>
+""", unsafe_allow_html=True)
+
+# 4. MULTIPLIER LOGIC
 type_chart = {
     'fire': {'grass': 2.0, 'water': 0.5, 'bug': 2.0, 'ice': 2.0, 'dragon': 0.5, 'steel': 2.0, 'rock': 0.5, 'ground': 0.5},
     'water': {'fire': 2.0, 'ground': 2.0, 'rock': 2.0, 'grass': 0.5, 'dragon': 0.5},
@@ -181,64 +210,48 @@ type_chart = {
     'normal': {'rock': 0.5, 'ghost': 0.0, 'steel': 0.5},
     'None': {}
 }
-
 def get_multiplier(atk, d1, d2):
     m1 = type_chart.get(atk, {}).get(d1, 1.0)
     m2 = 1.0 if d2 == "None" else type_chart.get(atk, {}).get(d2, 1.0)
     return m1 * m2
 
 # ======================================================
-# 5. FIREWORKS FUNCTION
+# 5. FIREWORKS
 # ======================================================
 def run_fullscreen_fireworks():
     fireworks_html = """
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    <style>
-        .fireworks-container {
-            position: fixed; inset: 0; z-index: 99999; pointer-events: none;
-        }
-    </style>
+    <style> .fireworks-container { position: fixed; inset: 0; z-index: 99999; pointer-events: none; } </style>
     <div class="fireworks-container">
-        <lottie-player 
-            src="https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json" 
-            background="transparent" speed="1" style="width:100%; height:100%;" autoplay>
-        </lottie-player>
+        <lottie-player src="https://assets5.lottiefiles.com/packages/lf20_tiviyc3p.json" background="transparent" speed="1" style="width:100%; height:100%;" autoplay></lottie-player>
     </div>
     """
     components.html(fireworks_html, height=0, width=0)
 
 # ======================================================
-# 6. SESSION STATE
+# 6. SESSION STATE & CELEBRATION
 # ======================================================
-if "winner" not in st.session_state:
-    st.session_state.winner = None
-if "celebrate" not in st.session_state:
-    st.session_state.celebrate = False
+if "winner" not in st.session_state: st.session_state.winner = None
+if "celebrate" not in st.session_state: st.session_state.celebrate = False
 
 if st.session_state.celebrate:
     random.choice([st.balloons, run_fullscreen_fireworks])()
     st.session_state.celebrate = False
 
 # ======================================================
-# 7. LAYOUT
+# 7. MAIN UI LAYOUT
 # ======================================================
 with st.container():
     st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center;'><p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p></div>", unsafe_allow_html=True)
-    
-    # 🔥 USER TIP FOR AUDIO
-    st.toast("🔊 Click anywhere on the screen to enable Battle Music!", icon="🎵")
 
 col1, col2, col3 = st.columns([1, 0.2, 1])
 
-# --- PLAYER 1 UI ---
 with col1:
     st.markdown("<h2 style='text-align:center; color: white;'>Player 1</h2>", unsafe_allow_html=True)
-    p1 = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu default
+    p1 = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24)
     d1 = df[df['name'] == p1].iloc[0]
-
     card_class = "winner-card" if st.session_state.winner == p1 else ""
-    
     st.markdown(f"""
     <div class="poke-card {card_class}">
         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d1['id']}.png" width="150">
@@ -247,23 +260,18 @@ with col1:
         <div class="power-badge">⚡ POWER: {d1['total_power']}</div>
     </div>
     """, unsafe_allow_html=True)
-    
     st.progress(int(d1['hp']/255*100), f"HP: {d1['hp']}")
     st.progress(int(d1['attack']/190*100), f"ATK: {d1['attack']}")
     st.progress(int(d1['defense']/230*100), f"DEF: {d1['defense']}")
 
-# --- VS TEXT ---
 with col2:
     st.markdown("<h1 style='text-align:center; margin-left:25px; padding-top:220px; font-size:50px; color:#FF5733; text-shadow: 2px 2px #000;'>VS</h1>", unsafe_allow_html=True)
 
-# --- PLAYER 2 UI ---
 with col3:
     st.markdown("<h2 style='text-align:center; color: white;'>Player 2</h2>", unsafe_allow_html=True)
-    p2 = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard default
+    p2 = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5)
     d2 = df[df['name'] == p2].iloc[0]
-
     card_class = "winner-card" if st.session_state.winner == p2 else ""
-    
     st.markdown(f"""
     <div class="poke-card {card_class}">
         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d2['id']}.png" width="150">
@@ -272,7 +280,6 @@ with col3:
         <div class="power-badge">⚡ POWER: {d2['total_power']}</div>
     </div>
     """, unsafe_allow_html=True)
-    
     st.progress(int(d2['hp']/255*100), f"HP: {d2['hp']}")
     st.progress(int(d2['attack']/190*100), f"ATK: {d2['attack']}")
     st.progress(int(d2['defense']/230*100), f"DEF: {d2['defense']}")
@@ -292,28 +299,21 @@ if st.button("See Who Is Going To Win The Battle", use_container_width=True):
     m2 = get_multiplier(d2['type1'], d1['type1'], d1['type2'])
     
     input_data = pd.DataFrame([{
-        'hp_diff': d1['hp'] - d2['hp'],
-        'atk_diff': d1['attack'] - d2['attack'],
-        'def_diff': d1['defense'] - d2['defense'],
-        'spd_diff': d1['speed'] - d2['speed'],
+        'hp_diff': d1['hp'] - d2['hp'], 'atk_diff': d1['attack'] - d2['attack'],
+        'def_diff': d1['defense'] - d2['defense'], 'spd_diff': d1['speed'] - d2['speed'],
         'total_power_diff': d1['total_power'] - d2['total_power'],
-        'p1_real_advantage': m1,
-        'p2_real_advantage': m2
+        'p1_real_advantage': m1, 'p2_real_advantage': m2
     }])
     
     prediction = model.predict(input_data)[0]
-    probs = model.predict_proba(input_data)[0]
-    
     winner = p1 if prediction == 0 else p2
-    
     st.session_state.winner = winner
     st.session_state.celebrate = True 
-    
     st.rerun()
 
 if st.session_state.winner:
     st.markdown(f"""
-    <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(0,0,0,0.8); border-radius:10px; border:2px solid #4CAF50; backdrop-filter: blur(5px);">
+    <div style="text-align:center; margin-top:10px; margin-bottom:10px; padding:5px; background:rgba(255,255,255,0.2); border-radius:10px; border:2px solid #4CAF50; backdrop-filter: blur(10px);">
         <h2 style="color:#4CAF50; margin:0; font-size: 1.8rem;">THE BATTLE IS WON BY : {st.session_state.winner.upper()}</h2>
     </div>
     <h3 style="text-align:center; color:white; margin-top:5px; text-shadow: 1px 1px #000;">AI Confidence: {99.0}%</h3>
