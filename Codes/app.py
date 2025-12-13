@@ -10,13 +10,13 @@ import streamlit.components.v1 as components
 # 1. PAGE CONFIGURATION
 # ======================================================
 st.set_page_config(
-    page_title="Enna Look uh",
+    page_title="AI Pokémon Battle Arena",
     page_icon="⚔️",
     layout="wide"
 )
 
 # ======================================================
-# 🎥 BACKGROUND VIDEO WITH AUDIO
+# 🎥 BACKGROUND VIDEO (FORCE AUDIO FIX)
 # ======================================================
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -28,12 +28,11 @@ def set_background_video(video_filename):
     video_path = os.path.join(current_dir, video_filename)
     
     if not os.path.exists(video_path):
-        st.warning(f"⚠️ Machi, '{video_filename}' file kaanom! GitHub la upload panniya?")
+        st.warning(f"⚠️ Machi, '{video_filename}' file kaanom!")
         return
 
     bin_str = get_base64_of_bin_file(video_path)
     
-    # 🔥 FIXED: Removed the confusing comment inside the f-string
     video_html = f"""
     <style>
     .stApp {{
@@ -58,14 +57,25 @@ def set_background_video(video_filename):
     </video>
 
     <script>
-        // MOUSE MOVE UNMUTE LOGIC
-        document.addEventListener('mousemove', function() {{
+        // 🔥 AUDIO FIX: Browser only allows sound after USER INTERACTION (Click/Keypress)
+        // This script waits for ANY click on the page to Turn On Audio.
+        
+        function enableAudio() {{
             var video = document.getElementById('myVideo');
             if (video.muted) {{
                 video.muted = false;
+                video.volume = 1.0; // Force Max Volume
                 video.play();
+                console.log("Audio Enabled!");
             }}
-        }}, {{ once: true }});
+        }}
+
+        // Listen for Click or Keypress to unmute
+        document.addEventListener('click', enableAudio);
+        document.addEventListener('keydown', enableAudio);
+        
+        // Try mousemove once (might work in some browsers)
+        document.addEventListener('mousemove', enableAudio, {{ once: true }});
     </script>
     """
     st.markdown(video_html, unsafe_allow_html=True)
@@ -74,37 +84,50 @@ def set_background_video(video_filename):
 set_background_video('background.mp4')
 
 # ======================================================
-# 2. GLOBAL CSS (Styles)
+# 2. GLOBAL CSS (White Glass UI Update)
 # ======================================================
 st.markdown("""
 <style>
 .block-container { padding-top: 1rem !important; }
 h1 { margin-top: -20px !important; text-align: center; color: #FFCB05; text-shadow: 2px 2px #3B4CCA; }
-.subtitle { text-align: center; color: #cfcfcf; margin-bottom: 30px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; display: inline-block; }
+.subtitle { text-align: center; color: #eee; margin-bottom: 30px; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; display: inline-block; backdrop-filter: blur(5px); }
 
-/* CARD STYLE */
+/* 🔥 NEW WHITE GLASS CARD STYLE */
 .poke-card {
-    background: rgba(14, 17, 23, 0.6); 
-    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.15); /* White Transparent */
+    border-radius: 20px;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3); /* White Border */
     margin-bottom: 20px;
     transition: all 0.3s ease;
     text-align: center;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px); /* Frosted Glass Effect */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
-.poke-card:hover { transform: translateY(-5px); border-color: #8A2BE2; background: rgba(14, 17, 23, 0.8); }
+
+.poke-card:hover { 
+    transform: translateY(-5px); 
+    border-color: #fff; 
+    background: rgba(255, 255, 255, 0.25); 
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
 
 /* WINNER GLOW */
-.winner-card { border: 3px solid #ffd700 !important; box-shadow: 0 0 30px rgba(255, 215, 0, 0.6) !important; animation: pulse 1.5s infinite alternate; }
-@keyframes pulse { from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.9); } }
+.winner-card { 
+    border: 3px solid #ffd700 !important; 
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8) !important; 
+    animation: pulse 1.5s infinite alternate; 
+    background: rgba(255, 215, 0, 0.1) !important; /* Gold Tint */
+}
+@keyframes pulse { from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); } to { box-shadow: 0 0 50px rgba(255, 215, 0, 1.0); } }
 
-.poke-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 10px; }
-.power-badge { background: rgba(0,0,0,0.5); color: #4da3ff; padding: 5px 10px; border-radius: 10px; font-weight: bold; margin-top: 10px; display: inline-block; }
+/* TEXT COLORS */
+.poke-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-top: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.power-badge { background: rgba(0,0,0,0.6); color: #FFCB05; padding: 5px 15px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; border: 1px solid #FFCB05;}
 
 /* BUTTON */
-div.stButton > button { width: 100%; background-color: #FF4B4B; color: white; font-weight: bold; font-size: 20px; padding: 12px; border-radius: 8px; border: none; transition: all 0.3s; }
-div.stButton > button:hover { background-color: #D43F3F; transform: scale(1.01); }
+div.stButton > button { width: 100%; background-color: #FF4B4B; color: white; font-weight: bold; font-size: 20px; padding: 12px; border-radius: 8px; border: none; transition: all 0.3s; box-shadow: 0 4px 15px rgba(255, 75, 75, 0.4); }
+div.stButton > button:hover { background-color: #ff3333; transform: scale(1.02); box-shadow: 0 6px 20px rgba(255, 75, 75, 0.6); }
 </style>
 """, unsafe_allow_html=True)
 
@@ -185,25 +208,26 @@ def run_fullscreen_fireworks():
     components.html(fireworks_html, height=0, width=0)
 
 # ======================================================
-# 6. SESSION STATE & CELEBRATION
+# 6. SESSION STATE
 # ======================================================
 if "winner" not in st.session_state:
     st.session_state.winner = None
 if "celebrate" not in st.session_state:
     st.session_state.celebrate = False
 
-# Trigger Celebration if flag is set (After Rerun)
 if st.session_state.celebrate:
     random.choice([st.balloons, run_fullscreen_fireworks])()
-    st.session_state.celebrate = False  # Reset flag
+    st.session_state.celebrate = False
 
 # ======================================================
-# 7. UI LAYOUT
+# 7. LAYOUT
 # ======================================================
-# Container to keep title centered properly
 with st.container():
     st.markdown("<h1>⚡ Pokémon Battle Predictor ⚡</h1>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center;'><p class='subtitle'>Select two Pokémon and let the <b>AI Model</b> predict the winner!</p></div>", unsafe_allow_html=True)
+    
+    # 🔥 USER TIP FOR AUDIO
+    st.toast("🔊 Click anywhere on the screen to enable Battle Music!", icon="🎵")
 
 col1, col2, col3 = st.columns([1, 0.2, 1])
 
@@ -213,14 +237,13 @@ with col1:
     p1 = st.selectbox("Choose Pokémon 1", df['name'].unique(), index=24) # Pikachu default
     d1 = df[df['name'] == p1].iloc[0]
 
-    # Apply Glowing Class if Winner
     card_class = "winner-card" if st.session_state.winner == p1 else ""
     
     st.markdown(f"""
     <div class="poke-card {card_class}">
         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d1['id']}.png" width="150">
         <div class="poke-name">{p1.upper()}</div>
-        <div style="color:#aaa;">{d1['type1']} / {d1['type2']}</div>
+        <div style="color:#eee; font-weight:500;">{d1['type1']} / {d1['type2']}</div>
         <div class="power-badge">⚡ POWER: {d1['total_power']}</div>
     </div>
     """, unsafe_allow_html=True)
@@ -239,14 +262,13 @@ with col3:
     p2 = st.selectbox("Choose Pokémon 2", df['name'].unique(), index=5) # Charizard default
     d2 = df[df['name'] == p2].iloc[0]
 
-    # Apply Glowing Class if Winner
     card_class = "winner-card" if st.session_state.winner == p2 else ""
     
     st.markdown(f"""
     <div class="poke-card {card_class}">
         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{d2['id']}.png" width="150">
         <div class="poke-name">{p2.upper()}</div>
-        <div style="color:#aaa;">{d2['type1']} / {d2['type2']}</div>
+        <div style="color:#eee; font-weight:500;">{d2['type1']} / {d2['type2']}</div>
         <div class="power-badge">⚡ POWER: {d2['total_power']}</div>
     </div>
     """, unsafe_allow_html=True)
